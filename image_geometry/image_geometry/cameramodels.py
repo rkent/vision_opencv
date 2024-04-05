@@ -273,8 +273,9 @@ class StereoCameraModel:
     An idealized stereo camera.
     """
     def __init__(self):
-        self.left = PinholeCameraModel()
-        self.right = PinholeCameraModel()
+        self._left = PinholeCameraModel()
+        self._right = PinholeCameraModel()
+        self._q = None
 
     def fromCameraInfo(self, left_msg, right_msg):
         """
@@ -285,18 +286,18 @@ class StereoCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` messages.
         """
-        self.left.fromCameraInfo(left_msg)
-        self.right.fromCameraInfo(right_msg)
+        self._left.fromCameraInfo(left_msg)
+        self._right.fromCameraInfo(right_msg)
 
         # [ Fx, 0,  Cx,  Fx*-Tx ]
         # [ 0,  Fy, Cy,  0      ]
         # [ 0,  0,  1,   0      ]
 
-        assert self.right._p is not None
-        fx = self.right._p[0, 0]
-        cx = self.right._p[0, 2]
-        cy = self.right._p[1, 2]
-        tx = -self.right._p[0, 3] / fx
+        assert self._right._p is not None
+        fx = self._right.projectionMatrix()[0, 0]
+        cx = self._right.projectionMatrix()[0, 2]
+        cy = self._right.projectionMatrix()[1, 2]
+        tx = -self._right.projectionMatrix()[0, 3] / fx
 
         # Q is:
         #    [ 1, 0,  0, -Clx ]
@@ -304,13 +305,13 @@ class StereoCameraModel:
         #    [ 0, 0,  0,  Fx ]
         #    [ 0, 0, 1 / Tx, (Crx-Clx)/Tx ]
 
-        self.Q = numpy.zeros((4, 4), dtype='float64')
-        self.Q[0, 0] = 1.0
-        self.Q[0, 3] = -cx
-        self.Q[1, 1] = 1.0
-        self.Q[1, 3] = -cy
-        self.Q[2, 3] = fx
-        self.Q[3, 2] = 1 / tx
+        self._q = numpy.zeros((4, 4), dtype='float64')
+        self._q[0, 0] = 1.0
+        self._q[0, 3] = -cx
+        self._q[1, 1] = 1.0
+        self._q[1, 3] = -cy
+        self._q[2, 3] = fx
+        self._q[3, 2] = 1 / tx
 
     def tfFrame(self):
         """
@@ -319,7 +320,7 @@ class StereoCameraModel:
         may be used as a source frame in :class:`tf.TransformListener`.
         """
 
-        return self.left.tfFrame()
+        return self._left.tfFrame()
 
     def project3dToPixel(self, point):
         """
@@ -330,8 +331,8 @@ class StereoCameraModel:
         using the cameras' :math:`P` matrices.
         This is the inverse of :math:`projectPixelTo3d`.
         """
-        l = self.left.project3dToPixel(point)
-        r = self.right.project3dToPixel(point)
+        l = self._left.project3dToPixel(point)
+        r = self._right.project3dToPixel(point)
         return (l, r)
 
     def projectPixelTo3d(self, left_uv, disparity):
@@ -348,7 +349,7 @@ class StereoCameraModel:
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
         src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
-        dst = self.Q * src
+        dst = self._q * src
         x = dst[0, 0]
         y = dst[1, 0]
         z = dst[2, 0]
@@ -370,7 +371,7 @@ class StereoCameraModel:
         """
         if disparity == 0:
             return float('inf')
-        Tx = -self.right._p[0, 3]
+        Tx = -self._right.projectionMatrix()[0, 3]
         return Tx / disparity
 
     def getDisparity(self, Z):
@@ -383,5 +384,21 @@ class StereoCameraModel:
         """
         if Z == 0:
             return float('inf')
-        Tx = -self.right._p[0, 3]
+        Tx = -self._right.projectionMatrix()[0, 3]
         return Tx / Z
+    
+    
+    def get_left_camera(self)->PinholeCameraModel:
+        """ 
+        Returns the PinholeCameraModel object of the left camera
+        """
+        return self._left
+    
+    def get_right_camera(self)->PinholeCameraModel:
+        """ 
+        Returns the PinholeCameraModel object of the right camera
+        """
+        return self._right
+
+
+
