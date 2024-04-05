@@ -2,10 +2,13 @@ import cv2
 import math
 import copy
 import numpy
+import numpy as np
+import warnings
 
-def mkmat(rows, cols, L):
-    mat = numpy.matrix(L, dtype='float64')
-    mat.resize((rows,cols))
+def mkmat(rows, cols, L) -> numpy.ndarray:
+    # mat = numpy.matrix(L, dtype='float64')
+    mat = np.array(L,dtype='float64')
+    mat.resize(rows,cols)
     return mat
 
 class PinholeCameraModel:
@@ -114,7 +117,7 @@ class PinholeCameraModel:
         This is the inverse of :math:`projectPixelTo3dRay`.
         """
         src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
-        dst = self._p * src
+        dst = self._p @ src
         x = dst[0,0]
         y = dst[1,0]
         w = dst[2,0]
@@ -198,72 +201,152 @@ class PinholeCameraModel:
         """
         return Z * deltaV / self.fy()
 
-    def fullResolution(self):
-        """Returns the full resolution of the camera"""
-        return self._resolution
+    def fullResolution(self)->tuple[int, int]:
+        """
+        :rtype:                 tuple[int, int]
 
-    def intrinsicMatrix(self):
-        """ Returns :math:`K`, also called camera_matrix in cv docs """
+        Returns the full resolution of the camera as a tuple in the format (width, height)
+        """
+        return self._resolution
+    
+    def intrinsicMatrix(self)->numpy.matrix:
+        """ 
+        :rtype:                 numpy.matrix
+
+        PinholeCameraModel.intrinsicMatrix()->numpy.matrix is depricated. Please use intrinsic_matrix()->numpy.ndarray
+        Returns :math:`K`, also called camera_matrix in cv docs 
+        """
+        warnings.warn("PinholeCameraModel.intrinsicMatrix()->numpy.matrix is depricated. Please use intrinsic_matrix()->numpy.ndarray", DeprecationWarning)
         return self._k
 
-    def distortionCoeffs(self):
-        """ Returns :math:`D` """
+    def distortionCoeffs(self)->numpy.matrix:
+        """ 
+        :rtype:                 numpy.matrix
+        
+        PinholeCameraModel.distortionCoeffs()->numpy.matrix is depricated. Please use distortion_coeffs()->numpy.ndarray
+        Returns :math:`D` 
+        """
+        warnings.warn("PinholeCameraModel.distortionCoeffs()->numpy.matrix is depricated. Please use distortion_coeffs()->numpy.ndarray", DeprecationWarning)
         return self._d
 
-    def rotationMatrix(self):
-        """ Returns :math:`R` """
+    def rotationMatrix(self)->numpy.matrix:
+        """ 
+        :rtype:                 numpy.matrix
+
+        PinholeCameraModel.rotationMatrix()->numpy.matrix is depricated. Please use rotation_matrix()->numpy.ndarray
+        Returns :math:`R` 
+        """
+        warnings.warn("PinholeCameraModel.rotationMatrix()->numpy.matrix is depricated. Please use rotation_matrix()->numpy.ndarray", DeprecationWarning)
         return self._r
 
-    def projectionMatrix(self):
-        """ Returns :math:`P` """
-        return self._p
+    def projection_matrix(self) ->numpy.ndarray:
+        """ 
+        :rtype:                 numpy.ndarray
 
-    def fullIntrinsicMatrix(self):
-        """ Return the original camera matrix for full resolution """
+        Returns :math:`P` 
+        """
+        return self._p
+    
+    def projectionMatrix(self) -> numpy.matrix:
+        """ 
+        :rtype:                 numpy.matrix
+
+        PinholeCameraModel.projectionMatrix()->numpy.matrix is depricated. Please use projection_matrix()->numpy.ndarray
+        Returns :math:`P` 
+        """
+        warnings.warn("PinholeCameraModel.projectionMatrix()->numpy.matrix is depricated. Please use projection_matrix()->numpy.ndarray", DeprecationWarning)
+        return np.matrix(self.projection_matrix(), dtype='float64')
+
+
+    def fullIntrinsicMatrix(self) -> numpy.matrix:
+        """ 
+        :rtype:                 numpy.matrix
+
+        PinholeCameraModel.fullIntrinsicMatrix()->numpy.matrix is depricated. Please use full_intrinsic_matrix()->numpy.ndarray"
+        Return the original camera matrix for full resolution 
+        """
+        warnings.warn("PinholeCameraModel.fullIntrinsicMatrix()->numpy.matrix is depricated. Please use full_intrinsic_matrix()->numpy.ndarray", DeprecationWarning)        
         return self._full_K
 
-    def fullProjectionMatrix(self):
-        """ Return the projection matrix for full resolution """
+    def fullProjectionMatrix(self)->numpy.matrix:
+        """ 
+        :rtype:                 numpy.matrix
+
+        PinholeCameraModel.fullProjectionMatrix()->numpy.matrix is depricated. Please use full_projection_matrix()->numpy.ndarray
+        Return the projection matrix for full resolution """
+        warnings.warn("PinholeCameraModel.fullProjectionMatrix()->numpy.matrix is depricated. Please use full_projection_matrix()->numpy.ndarray", DeprecationWarning)        
         return self._full_P
 
-    def cx(self):
-        """ Returns x center """
+    def cx(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns x center """
         return self._p[0,2]
 
-    def cy(self):
-        """ Returns y center """
+    def cy(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns y center 
+        """
         return self._p[1,2]
 
-    def fx(self):
-        """ Returns x focal length """
+    def fx(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns x focal length 
+        """
         return self._p[0,0]
 
-    def fy(self):
-        """ Returns y focal length """
+    def fy(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns y focal length 
+        """
         return self._p[1,1]
 
-    def Tx(self):
-        """ Return the x-translation term of the projection matrix """
+    def Tx(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Return the x-translation term of the projection matrix 
+        """
         return self._p[0,3]
 
-    def Ty(self):
-        """ Return the y-translation term of the projection matrix """
+    def Ty(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Return the y-translation term of the projection matrix 
+        """
         return self._p[1,3]
 
-    def fovX(self):
-        """ Returns the horizontal field of view in radians.
-            Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
+    def fovX(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns the horizontal field of view in radians.
+        Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
         """
         return 2 * math.atan(self._width / (2 * self.fx()))
 
-    def fovY(self):
-        """ Returns the vertical field of view in radians.
-            Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
+    def fovY(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns the vertical field of view in radians.
+        Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
         """
         return 2 * math.atan(self._height / (2 * self.fy()))
 
-    def tfFrame(self):
-        """ Returns the tf frame name - a string - of the camera.
+    def tfFrame(self)->str:
+        """ 
+        :rtype:                 str      
+        
+        Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         return self._tf_frame
@@ -294,10 +377,10 @@ class StereoCameraModel:
         # [ 0,  0,  1,   0      ]
 
         assert self._right._p is not None
-        fx = self._right.projectionMatrix()[0, 0]
-        cx = self._right.projectionMatrix()[0, 2]
-        cy = self._right.projectionMatrix()[1, 2]
-        tx = -self._right.projectionMatrix()[0, 3] / fx
+        fx = self._right.projection_matrix()[0, 0]
+        cx = self._right.projection_matrix()[0, 2]
+        cy = self._right.projection_matrix()[1, 2]
+        tx = -self._right.projection_matrix()[0, 3] / fx
 
         # Q is:
         #    [ 1, 0,  0, -Clx ]
@@ -313,16 +396,17 @@ class StereoCameraModel:
         self._q[2, 3] = fx
         self._q[3, 2] = 1 / tx
 
-    def tfFrame(self):
-        """
-        Returns the tf frame name - a string - of the 3d points.  This is
-        the frame of the :class:`sensor_msgs.msg.CameraInfo` message.  It
-        may be used as a source frame in :class:`tf.TransformListener`.
+    def tfFrame(self)->str:
+        """ 
+        :rtype:                 str      
+        
+        Returns the tf frame name - a string - of the camera.
+        This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
 
         return self._left.tfFrame()
 
-    def project3dToPixel(self, point):
+    def project3dToPixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
         """
         :param point:     3D point
         :type point:      (x, y, z)
@@ -349,7 +433,7 @@ class StereoCameraModel:
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
         src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
-        dst = self._q * src
+        dst = self._q @ src
         x = dst[0, 0]
         y = dst[1, 0]
         z = dst[2, 0]
@@ -384,7 +468,7 @@ class StereoCameraModel:
         """
         if Z == 0:
             return float('inf')
-        Tx = -self._right.projectionMatrix()[0, 3]
+        Tx = -self._right.projection_matrix()[0, 3]
         return Tx / Z
     
     
@@ -399,6 +483,80 @@ class StereoCameraModel:
         Returns the PinholeCameraModel object of the right camera
         """
         return self._right
+    
+if __name__ == '__main__':
+#    from __future__ import print_function
+
+    import unittest
+    import sensor_msgs.msg
+
+    #from image_geometry import PinholeCameraModel, StereoCameraModel
+
+    class TestDirected(unittest.TestCase):
+
+        def setUp(self):
+            pass
+
+        def test_monocular(self):
+            ci = sensor_msgs.msg.CameraInfo()
+            ci.width = 640
+            ci.height = 480
+            print(ci)
+            cam = PinholeCameraModel()
+            cam.fromCameraInfo(ci)
+            print(cam.rectifyPoint((0, 0)))
+
+            print(cam.project3dToPixel((0,0,0)))
+
+        def test_stereo(self):
+            lmsg = sensor_msgs.msg.CameraInfo()
+            rmsg = sensor_msgs.msg.CameraInfo()
+            for m in (lmsg, rmsg):
+                m.width = 640
+                m.height = 480
+
+            # These parameters taken from a real camera calibration
+            lmsg.d =  [-0.363528858080088, 0.16117037733986861, -8.1109585007538829e-05, -0.00044776712298447841, 0.0]
+            lmsg.k =  [430.15433020105519, 0.0, 311.71339830549732, 0.0, 430.60920415473657, 221.06824942698509, 0.0, 0.0, 1.0]
+            lmsg.r =  [0.99806560714807102, 0.0068562422224214027, 0.061790256276695904, -0.0067522959054715113, 0.99997541519165112, -0.0018909025066874664, -0.061801701660692349, 0.0014700186639396652, 0.99808736527268516]
+            lmsg.p =  [295.53402059708782, 0.0, 285.55760765075684, 0.0, 0.0, 295.53402059708782, 223.29617881774902, 0.0, 0.0, 0.0, 1.0, 0.0]
+
+            rmsg.d =  [-0.3560641041112021, 0.15647260261553159, -0.00016442960757099968, -0.00093175810713916221]
+            rmsg.k =  [428.38163131344191, 0.0, 327.95553847249192, 0.0, 428.85728580588329, 217.54828640915309, 0.0, 0.0, 1.0]
+            rmsg.r =  [0.9982082576219119, 0.0067433328293516528, 0.059454199832973849, -0.0068433268864187356, 0.99997549128605434, 0.0014784127772287513, -0.059442773257581252, -0.0018826283666309878, 0.99822993965212292]
+            rmsg.p =  [295.53402059708782, 0.0, 285.55760765075684, -26.507895206214123, 0.0, 295.53402059708782, 223.29617881774902, 0.0, 0.0, 0.0, 1.0, 0.0]
+
+            cam = StereoCameraModel()
+            cam.fromCameraInfo(lmsg, rmsg)
+
+            for x in (16, 320, m.width - 16):
+                for y in (16, 240, m.height - 16):
+                    for d in range(1, 10):
+                        pt3d = cam.projectPixelTo3d((x, y), d)
+                        ((lx, ly), (rx, ry)) = cam.project3dToPixel(pt3d)
+                        self.assertAlmostEqual(y, ly, 3)
+                        self.assertAlmostEqual(y, ry, 3)
+                        self.assertAlmostEqual(x, lx, 3)
+                        self.assertAlmostEqual(x, rx + d, 3)
+
+            u = 100.0
+            v = 200.0
+            du = 17.0
+            dv = 23.0
+            Z = 2.0
+            xyz0 = cam.get_left_camera().projectPixelTo3dRay((u, v))
+            xyz0 = (xyz0[0] * (Z / xyz0[2]), xyz0[1] * (Z / xyz0[2]), Z)
+            xyz1 = cam.get_left_camera().projectPixelTo3dRay((u + du, v + dv))
+            xyz1 = (xyz1[0] * (Z / xyz1[2]), xyz1[1] * (Z / xyz1[2]), Z)
+            self.assertAlmostEqual(cam.get_left_camera().getDeltaU(xyz1[0] - xyz0[0], Z), du, 3)
+            self.assertAlmostEqual(cam.get_left_camera().getDeltaV(xyz1[1] - xyz0[1], Z), dv, 3)
+            self.assertAlmostEqual(cam.get_left_camera().getDeltaX(du, Z), xyz1[0] - xyz0[0], 3)
+            self.assertAlmostEqual(cam.get_left_camera().getDeltaY(dv, Z), xyz1[1] - xyz0[1], 3)
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestDirected('test_stereo'))
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
 
 
 
