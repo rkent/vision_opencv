@@ -15,19 +15,20 @@ class PinholeCameraModel:
     """
 
     def __init__(self):
-        self.K = None
-        self.D = None
-        self.R = None
-        self.P = None
-        self.full_K = None
-        self.full_P = None
-        self.width = None
-        self.height = None
-        self.binning_x = None
-        self.binning_y = None
-        self.raw_roi = None
-        self.tf_frame = None
-        self.stamp = None
+        self._k = None
+        self._d = None
+        self._r = None
+        self._p = None
+        self._full_K = None
+        self._full_P = None
+        self._width = None
+        self._height = None
+        self._binning_x = None
+        self._binning_y = None
+        self._raw_roi = None
+        self._tf_frame = None
+        self._stamp = None
+        self._resolution = None
 
     def fromCameraInfo(self, msg):
         """
@@ -36,39 +37,39 @@ class PinholeCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        self.K = mkmat(3, 3, msg.k)
+        self._k = mkmat(3, 3, msg.k)
         if msg.d:
-            self.D = mkmat(len(msg.d), 1, msg.d)
+            self._d = mkmat(len(msg.d), 1, msg.d)
         else:
-            self.D = None
-        self.R = mkmat(3, 3, msg.r)
-        self.P = mkmat(3, 4, msg.p)
-        self.full_K = mkmat(3, 3, msg.k)
-        self.full_P = mkmat(3, 4, msg.p)
-        self.width = msg.width
-        self.height = msg.height
-        self.binning_x = max(1, msg.binning_x)
-        self.binning_y = max(1, msg.binning_y)
-        self.resolution = (msg.width, msg.height)
+            self._d = None
+        self._r = mkmat(3, 3, msg.r)
+        self._p = mkmat(3, 4, msg.p)
+        self._full_K = mkmat(3, 3, msg.k)
+        self._full_P = mkmat(3, 4, msg.p)
+        self._width = msg.width
+        self._height = msg.height
+        self._binning_x = max(1, msg.binning_x)
+        self._binning_y = max(1, msg.binning_y)
+        self._resolution = (msg.width, msg.height)
 
-        self.raw_roi = copy.copy(msg.roi)
+        self._raw_roi = copy.copy(msg.roi)
         # ROI all zeros is considered the same as full resolution
-        if (self.raw_roi.x_offset == 0 and self.raw_roi.y_offset == 0 and
-            self.raw_roi.width == 0 and self.raw_roi.height == 0):
-            self.raw_roi.width = self.width
-            self.raw_roi.height = self.height
-        self.tf_frame = msg.header.frame_id
-        self.stamp = msg.header.stamp
+        if (self._raw_roi.x_offset == 0 and self._raw_roi.y_offset == 0 and
+            self._raw_roi.width == 0 and self._raw_roi.height == 0):
+            self._raw_roi.width = self._width
+            self._raw_roi.height = self._height
+        self._tf_frame = msg.header.frame_id
+        self._stamp = msg.header.stamp
 
         # Adjust K and P for binning and ROI
-        self.K[0,0] /= self.binning_x
-        self.K[1,1] /= self.binning_y
-        self.K[0,2] = (self.K[0,2] - self.raw_roi.x_offset) / self.binning_x
-        self.K[1,2] = (self.K[1,2] - self.raw_roi.y_offset) / self.binning_y
-        self.P[0,0] /= self.binning_x
-        self.P[1,1] /= self.binning_y
-        self.P[0,2] = (self.P[0,2] - self.raw_roi.x_offset) / self.binning_x
-        self.P[1,2] = (self.P[1,2] - self.raw_roi.y_offset) / self.binning_y
+        self._k[0,0] /= self._binning_x
+        self._k[1,1] /= self._binning_y
+        self._k[0,2] = (self._k[0,2] - self._raw_roi.x_offset) / self._binning_x
+        self._k[1,2] = (self._k[1,2] - self._raw_roi.y_offset) / self._binning_y
+        self._p[0,0] /= self._binning_x
+        self._p[1,1] /= self._binning_y
+        self._p[0,2] = (self._p[0,2] - self._raw_roi.x_offset) / self._binning_x
+        self._p[1,2] = (self._p[1,2] - self._raw_roi.y_offset) / self._binning_y
 
     def rectifyImage(self, raw, rectified):
         """
@@ -80,12 +81,12 @@ class PinholeCameraModel:
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
         """
 
-        self.mapx = numpy.ndarray(shape=(self.height, self.width, 1),
+        self.mapx = numpy.ndarray(shape=(self._height, self._width, 1),
                            dtype='float32')
-        self.mapy = numpy.ndarray(shape=(self.height, self.width, 1),
+        self.mapy = numpy.ndarray(shape=(self._height, self._width, 1),
                            dtype='float32')
-        cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P,
-                (self.width, self.height), cv2.CV_32FC1, self.mapx, self.mapy)
+        cv2.initUndistortRectifyMap(self._k, self._d, self._r, self._p,
+                (self._width, self._height), cv2.CV_32FC1, self.mapx, self.mapy)
         cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
 
     def rectifyPoint(self, uv_raw):
@@ -100,7 +101,7 @@ class PinholeCameraModel:
 
         src = mkmat(1, 2, list(uv_raw))
         src.resize((1,1,2))
-        dst = cv2.undistortPoints(src, self.K, self.D, R=self.R, P=self.P)
+        dst = cv2.undistortPoints(src, self._k, self._d, R=self._r, P=self._p)
         return dst[0,0]
 
     def project3dToPixel(self, point):
@@ -113,7 +114,7 @@ class PinholeCameraModel:
         This is the inverse of :math:`projectPixelTo3dRay`.
         """
         src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
-        dst = self.P * src
+        dst = self._p * src
         x = dst[0,0]
         y = dst[1,0]
         w = dst[2,0]
@@ -199,73 +200,73 @@ class PinholeCameraModel:
 
     def fullResolution(self):
         """Returns the full resolution of the camera"""
-        return self.resolution
+        return self._resolution
 
     def intrinsicMatrix(self):
         """ Returns :math:`K`, also called camera_matrix in cv docs """
-        return self.K
+        return self._k
 
     def distortionCoeffs(self):
         """ Returns :math:`D` """
-        return self.D
+        return self._d
 
     def rotationMatrix(self):
         """ Returns :math:`R` """
-        return self.R
+        return self._r
 
     def projectionMatrix(self):
         """ Returns :math:`P` """
-        return self.P
+        return self._p
 
     def fullIntrinsicMatrix(self):
         """ Return the original camera matrix for full resolution """
-        return self.full_K
+        return self._full_K
 
     def fullProjectionMatrix(self):
         """ Return the projection matrix for full resolution """
-        return self.full_P
+        return self._full_P
 
     def cx(self):
         """ Returns x center """
-        return self.P[0,2]
+        return self._p[0,2]
 
     def cy(self):
         """ Returns y center """
-        return self.P[1,2]
+        return self._p[1,2]
 
     def fx(self):
         """ Returns x focal length """
-        return self.P[0,0]
+        return self._p[0,0]
 
     def fy(self):
         """ Returns y focal length """
-        return self.P[1,1]
+        return self._p[1,1]
 
     def Tx(self):
         """ Return the x-translation term of the projection matrix """
-        return self.P[0,3]
+        return self._p[0,3]
 
     def Ty(self):
         """ Return the y-translation term of the projection matrix """
-        return self.P[1,3]
+        return self._p[1,3]
 
     def fovX(self):
         """ Returns the horizontal field of view in radians.
             Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
         """
-        return 2 * math.atan(self.width / (2 * self.fx()))
+        return 2 * math.atan(self._width / (2 * self.fx()))
 
     def fovY(self):
         """ Returns the vertical field of view in radians.
             Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
         """
-        return 2 * math.atan(self.height / (2 * self.fy()))
+        return 2 * math.atan(self._height / (2 * self.fy()))
 
     def tfFrame(self):
         """ Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        return self.tf_frame
+        return self._tf_frame
 
 class StereoCameraModel:
     """
@@ -291,11 +292,11 @@ class StereoCameraModel:
         # [ 0,  Fy, Cy,  0      ]
         # [ 0,  0,  1,   0      ]
 
-        assert self.right.P is not None
-        fx = self.right.P[0, 0]
-        cx = self.right.P[0, 2]
-        cy = self.right.P[1, 2]
-        tx = -self.right.P[0, 3] / fx
+        assert self.right._p is not None
+        fx = self.right._p[0, 0]
+        cx = self.right._p[0, 2]
+        cy = self.right._p[1, 2]
+        tx = -self.right._p[0, 3] / fx
 
         # Q is:
         #    [ 1, 0,  0, -Clx ]
@@ -369,7 +370,7 @@ class StereoCameraModel:
         """
         if disparity == 0:
             return float('inf')
-        Tx = -self.right.P[0, 3]
+        Tx = -self.right._p[0, 3]
         return Tx / disparity
 
     def getDisparity(self, Z):
@@ -382,5 +383,5 @@ class StereoCameraModel:
         """
         if Z == 0:
             return float('inf')
-        Tx = -self.right.P[0, 3]
+        Tx = -self.right._p[0, 3]
         return Tx / Z
