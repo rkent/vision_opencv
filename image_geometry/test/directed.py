@@ -4,7 +4,7 @@ import unittest
 import sensor_msgs.msg
 
 from image_geometry import PinholeCameraModel, StereoCameraModel
-from numpy.testing import assert_almost_equal, assert_array_equal
+from numpy.testing import assert_almost_equal
 
 class TestDirected(unittest.TestCase):
 
@@ -31,7 +31,7 @@ class TestDirected(unittest.TestCase):
         self.rmsg.header.frame_id = "right_camera"
 
         self.cam = StereoCameraModel()
-        self.cam.fromCameraInfo(self.lmsg, self.rmsg)
+        self.cam.from_camera_info(self.lmsg, self.rmsg)
 
     def test_monocular(self):
         ci = sensor_msgs.msg.CameraInfo()
@@ -39,17 +39,17 @@ class TestDirected(unittest.TestCase):
         ci.height = 480
         print(ci)
         cam = PinholeCameraModel()
-        cam.fromCameraInfo(ci)
-        print(cam.rectifyPoint((0, 0)))
+        cam.from_camera_info(ci)
+        print(cam.rectify_point((0, 0)))
 
-        print(cam.project3dToPixel((0,0,0)))
+        print(cam.project_3d_to_pixel((0,0,0)))
 
     def test_stereo(self):
         for x in (16, 320, self.width - 16):
             for y in (16, 240, self.height - 16):
                 for d in range(1, 10):
-                    pt3d = self.cam.projectPixelTo3d((x, y), d)
-                    ((lx, ly), (rx, ry)) = self.cam.project3dToPixel(pt3d)
+                    pt3d = self.cam.project_pixel_to_3d((x, y), d)
+                    ((lx, ly), (rx, ry)) = self.cam.project_3d_to_pixel(pt3d)
                     self.assertAlmostEqual(y, ly, 3)
                     self.assertAlmostEqual(y, ry, 3)
                     self.assertAlmostEqual(x, lx, 3)
@@ -60,71 +60,71 @@ class TestDirected(unittest.TestCase):
         du = 17.0
         dv = 23.0
         Z = 2.0
-        xyz0 = self.cam.get_left_camera().projectPixelTo3dRay((u, v))
+        xyz0 = self.cam.get_left_camera().project_pixel_to_3d_ray((u, v))
         xyz0 = (xyz0[0] * (Z / xyz0[2]), xyz0[1] * (Z / xyz0[2]), Z)
-        xyz1 = self.cam.get_left_camera().projectPixelTo3dRay((u + du, v + dv))
+        xyz1 = self.cam.get_left_camera().project_pixel_to_3d_ray((u + du, v + dv))
         xyz1 = (xyz1[0] * (Z / xyz1[2]), xyz1[1] * (Z / xyz1[2]), Z)
-        self.assertAlmostEqual(self.cam.get_left_camera().getDeltaU(xyz1[0] - xyz0[0], Z), du, 3)
-        self.assertAlmostEqual(self.cam.get_left_camera().getDeltaV(xyz1[1] - xyz0[1], Z), dv, 3)
-        self.assertAlmostEqual(self.cam.get_left_camera().getDeltaX(du, Z), xyz1[0] - xyz0[0], 3)
-        self.assertAlmostEqual(self.cam.get_left_camera().getDeltaY(dv, Z), xyz1[1] - xyz0[1], 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_u(xyz1[0] - xyz0[0], Z), du, 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_v(xyz1[1] - xyz0[1], Z), dv, 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_x(du, Z), xyz1[0] - xyz0[0], 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_y(dv, Z), xyz1[1] - xyz0[1], 3)
 
     def test_rectify_point(self):
         uv_raw = (1.0, 2.0)
         expected = [48.16447369,45.49210841]
-        actual = self.cam.get_left_camera().rectifyPoint(uv_raw)
+        actual = self.cam.get_left_camera().rectify_point(uv_raw)
         assert_almost_equal(expected,actual,3)
 
     def test_project_3d_to_pixel(self):
         point = (1.0, 2.0, 3.0)
         expected = [384.069,420.319]
-        actual = self.cam.get_left_camera().project3dToPixel(point)
+        actual = self.cam.get_left_camera().project_3d_to_pixel(point)
         assert_almost_equal(expected,actual,3)
 
     def test_project_pixel_to_3d_ray(self):
         uv = (1.0, 2.0)
         expected = [-0.61,-0.475,0.634]
-        actual = self.cam.get_left_camera().projectPixelTo3dRay(uv)
+        actual = self.cam.get_left_camera().project_pixel_to_3d_ray(uv)
         assert_almost_equal(expected,actual,3)
 
     def test_get_delta_u(self):
         delta_x = 1.0
         z = 2.0
         expected = 147.767
-        actual = self.cam.get_left_camera().getDeltaU(delta_x,z)
+        actual = self.cam.get_left_camera().get_delta_u(delta_x,z)
         assert_almost_equal(expected,actual,3)
     
     def test_get_delta_v(self):
         delta_y = 1.0
         z = 2.0
         expected = 147.767
-        actual = self.cam.get_left_camera().getDeltaV(delta_y,z)
+        actual = self.cam.get_left_camera().get_delta_v(delta_y,z)
         assert_almost_equal(expected,actual,3)
     
     def test_get_delta_x(self):
         delta_u = 1.0
         z = 2.0
         expected = 0.00676741
-        actual = self.cam.get_left_camera().getDeltaX(delta_u,z)
+        actual = self.cam.get_left_camera().get_delta_x(delta_u,z)
         assert_almost_equal(expected,actual,6)
 
     def test_get_delta_y(self):
         delta_v = 1.0
         z = 2.0
         expected = 0.00676741
-        actual = self.cam.get_left_camera().getDeltaY(delta_v,z)
+        actual = self.cam.get_left_camera().get_delta_y(delta_v,z)
         assert_almost_equal(expected,actual,6)
 
     def test_full_resolution(self):
         expected = (640,480)
-        actual = self.cam.get_left_camera().fullResolution()
+        actual = self.cam.get_left_camera().full_resolution()
         self.assertTupleEqual(expected,actual)
 
     def test_intrinsic_matrix(self):
         expected = [[430.15433 ,   0.      , 311.713398],
                     [  0.      , 430.609204, 221.068249],
                     [  0.      ,   0.      ,   1.      ]]
-        actual = self.cam.get_left_camera().intrinsicMatrix()
+        actual = self.cam.get_left_camera().intrinsic_matrix()
         assert_almost_equal(expected,actual,6)
 
     def test_distortion_coeffs(self):
@@ -133,35 +133,35 @@ class TestDirected(unittest.TestCase):
                     [-8.11095850e-05],
                     [-4.47767123e-04],
                     [ 0.00000000e+00]]
-        actual = self.cam.get_left_camera().distortionCoeffs()
+        actual = self.cam.get_left_camera().distortion_coeffs()
         assert_almost_equal(expected,actual,6)
 
     def test_rotation_matrix(self):
         expected = [[ 0.998066,  0.006856,  0.06179 ],
                     [-0.006752,  0.999975, -0.001891],
                     [-0.061802,  0.00147 ,  0.998087]]
-        actual = self.cam.get_left_camera().rotationMatrix()
+        actual = self.cam.get_left_camera().rotation_matrix()
         assert_almost_equal(expected,actual,6)
 
     def test_projection_matrix(self):
         expected = [[295.534021,   0.      , 285.557608,   0.      ],
                     [  0.      , 295.534021, 223.296179,   0.      ],
                     [  0.      ,   0.      ,   1.      ,   0.      ]]
-        actual = self.cam.get_left_camera().projectionMatrix()
+        actual = self.cam.get_left_camera().projection_matrix()
         assert_almost_equal(expected,actual,6)
     
     def test_full_intrinsic_matrix(self):
         expected = [[430.15433 ,   0.      , 311.713398],
                     [  0.      , 430.609204, 221.068249],
                     [  0.      ,   0.      ,   1.      ]]
-        actual = self.cam.get_left_camera().fullIntrinsicMatrix()
+        actual = self.cam.get_left_camera().full_intrinsic_matrix()
         assert_almost_equal(expected,actual,6)
 
     def test_full_projection_matrix(self):
         expected = [[295.534021,   0.      , 285.557608,   0.      ],
                     [  0.      , 295.534021, 223.296179,   0.      ],
                     [  0.      ,   0.      ,   1.      ,   0.      ]]
-        actual = self.cam.get_left_camera().fullProjectionMatrix()
+        actual = self.cam.get_left_camera().full_projection_matrix()
         assert_almost_equal(expected,actual,6)
 
     def test_cx(self):
@@ -186,52 +186,52 @@ class TestDirected(unittest.TestCase):
 
     def test_tx(self):
         expected = 0.0
-        actual = self.cam.get_left_camera().Tx()
+        actual = self.cam.get_left_camera().tx()
         assert_almost_equal(expected,actual,6)   
 
     def test_ty(self):
         expected = 0.0
-        actual = self.cam.get_left_camera().Ty()
+        actual = self.cam.get_left_camera().ty()
         assert_almost_equal(expected,actual,6)   
 
     def test_fov_x(self):
         expected = 1.6502496354
-        actual = self.cam.get_left_camera().fovX()
+        actual = self.cam.get_left_camera().fov_x()
         assert_almost_equal(expected,actual,6)   
 
     def test_fov_y(self):
         expected = 1.364138172
-        actual = self.cam.get_left_camera().fovY()
+        actual = self.cam.get_left_camera().fov_y()
         assert_almost_equal(expected,actual,6)   
 
     def test_tf_frame(self):
         expected = "left_camera"
-        actual = self.cam.get_left_camera().tfFrame()
+        actual = self.cam.get_left_camera().tf_frame()
         self.assertEqual(expected,actual)   
 
     def test_stereo_project_3d_to_pixel(self):
         point = (1.0,2.0,3.0)
-        expected = (self.cam.get_left_camera().project3dToPixel(point), self.cam.get_right_camera().project3dToPixel(point))
-        actual = self.cam.project3dToPixel(point)
+        expected = (self.cam.get_left_camera().project_3d_to_pixel(point), self.cam.get_right_camera().project_3d_to_pixel(point))
+        actual = self.cam.project_3d_to_pixel(point)
         assert_almost_equal(expected, actual, 6)
 
     def test_stereo_project_pixel_to_3d(self):
         left_uv = (1.0,2.0)
         disparity = 1.1234
         expected = [-22.71975 , -17.668808,  23.596132]
-        actual = self.cam.projectPixelTo3d(left_uv, disparity)
+        actual = self.cam.project_pixel_to_3d(left_uv, disparity)
         assert_almost_equal(expected, actual, 6)
 
-    def test_stereo_project_get_z(self):
+    def test_stereo_get_z(self):
         disparity = 1.1234
         expected = 23.59613246
-        actual = self.cam.getZ(disparity)
+        actual = self.cam.get_z(disparity)
         assert_almost_equal(expected, actual, 6)
 
-    def test_stereo_project_get_disparity(self):
+    def test_stereo_get_disparity(self):
         z = 23.59613246
         expected = 1.1234
-        actual = self.cam.getDisparity(z)
+        actual = self.cam.get_disparity(z)
         assert_almost_equal(expected, actual, 6)
 if __name__ == '__main__':
     suite = unittest.TestSuite()
@@ -251,7 +251,6 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_projection_matrix'))
     suite.addTest(TestDirected('test_full_intrinsic_matrix'))
     suite.addTest(TestDirected('test_full_projection_matrix'))
-    suite.addTest(TestDirected('test_full_projection_matrix'))
     suite.addTest(TestDirected('test_cx'))
     suite.addTest(TestDirected('test_cy'))
     suite.addTest(TestDirected('test_fx'))
@@ -263,6 +262,6 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_tf_frame'))
     suite.addTest(TestDirected('test_stereo_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_stereo_project_pixel_to_3d'))
-    suite.addTest(TestDirected('test_stereo_project_get_z'))
-    suite.addTest(TestDirected('test_stereo_project_get_disparity'))
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite.addTest(TestDirected('test_stereo_get_z'))
+    suite.addTest(TestDirected('test_stereo_get_disparity'))
+    unittest.TextTestRunner(verbosity=3).run(suite)

@@ -33,7 +33,7 @@ class PinholeCameraModel:
         self._stamp = None
         self._resolution = None
 
-    def fromCameraInfo(self, msg):
+    def from_camera_info(self, msg)->None:
         """
         :param msg: camera parameters
         :type msg:  sensor_msgs.msg.CameraInfo
@@ -74,7 +74,19 @@ class PinholeCameraModel:
         self._p[0,2] = (self._p[0,2] - self._raw_roi.x_offset) / self._binning_x
         self._p[1,2] = (self._p[1,2] - self._raw_roi.y_offset) / self._binning_y
 
-    def rectifyImage(self, raw, rectified):
+    """
+    :param msg: camera parameters
+    :type msg:  sensor_msgs.msg.CameraInfo
+
+    PinholeCameraModel.fromCameraInfo()->None is depricated. Please use from_camera_info()->None
+    Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
+    """
+    def fromCameraInfo(self,msg)->None:
+        warnings.warn("PinholeCameraModel.fromCameraInfo() is depricated. Please use from_camera_info()", DeprecationWarning)  
+        self.from_camera_info(msg)
+
+
+    def rectify_image(self, raw, rectified)->None:
         """
         :param raw:       input image
         :type raw:        :class:`CvMat` or :class:`IplImage`
@@ -92,10 +104,24 @@ class PinholeCameraModel:
                 (self._width, self._height), cv2.CV_32FC1, self.mapx, self.mapy)
         cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
 
-    def rectifyPoint(self, uv_raw):
+    def rectifyImage(self, raw, rectified):
+        """
+        :param raw:       input image
+        :type raw:        :class:`CvMat` or :class:`IplImage`
+        :param rectified: rectified output image
+        :type rectified:  :class:`CvMat` or :class:`IplImage`
+
+        PinholeCameraModel.rectifyImage()->None is depricated. Please use rectify_image()->None
+        Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
+        """
+        warnings.warn("PinholeCameraModel.rectifyImage() is depricated. Please use rectify_image()", DeprecationWarning) 
+        self.rectify_image(raw, rectified)
+
+    def rectify_point(self, uv_raw)->numpy.ndarray:
         """
         :param uv_raw:    pixel coordinates
         :type uv_raw:     (u, v)
+        :rtype:           numpy.ndarray
 
         Applies the rectification specified by camera parameters
         :math:`K` and and :math:`D` to point (u, v) and returns the
@@ -106,11 +132,26 @@ class PinholeCameraModel:
         src.resize((1,1,2))
         dst = cv2.undistortPoints(src, self._k, self._d, R=self._r, P=self._p)
         return dst[0,0]
+    
+    def rectifyPoint(self, uv_raw)->numpy.ndarray:
+        """
+        :param uv_raw:    pixel coordinates
+        :type uv_raw:     (u, v)
+        :rtype:           numpy.ndarray
 
-    def project3dToPixel(self, point):
+        PinholeCameraModel.rectifyPoint()->numpy.ndarray is depricated. Please use rectify_point()->numpy.ndarray
+        Applies the rectification specified by camera parameters
+        :math:`K` and and :math:`D` to point (u, v) and returns the
+        pixel coordinates of the rectified point.
+        """
+        warnings.warn("PinholeCameraModel.rectifyPoint() is depricated. Please use rectify_point()", DeprecationWarning) 
+        return self.rectify_point(uv_raw)
+
+    def project_3d_to_pixel(self, point)->tuple[float,float]:
         """
         :param point:     3D point
         :type point:      (x, y, z)
+        :rtype            tuple[float,float]
 
         Returns the rectified pixel coordinates (u, v) of the 3D point,
         using the camera :math:`P` matrix.
@@ -125,15 +166,30 @@ class PinholeCameraModel:
             return (x / w, y / w)
         else:
             return (float('nan'), float('nan'))
+    
+    def project3dToPixel(self, point)->tuple[float,float]:
+        """
+        :param point:     3D point
+        :type point:      (x, y, z)
+        :rtype            tuple[float,float]
 
-    def projectPixelTo3dRay(self, uv):
+        PinholeCameraModel.project3dToPixel() is depricated. Please use project_3d_to_pixel()
+        Returns the rectified pixel coordinates (u, v) of the 3D point,
+        using the camera :math:`P` matrix.
+        This is the inverse of :math:`projectPixelTo3dRay`.
+        """
+        warnings.warn("PinholeCameraModel.project3dToPixel() is depricated. Please use project_3d_to_pixel()", DeprecationWarning) 
+        return self.project_3d_to_pixel(point)
+
+    def project_pixel_to_3d_ray(self, uv)->tuple[float,float,float]:
         """
         :param uv:        rectified pixel coordinates
         :type uv:         (u, v)
+        :rtype:           tuple[float,float,float]
 
         Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
         using the camera :math:`P` matrix.
-        This is the inverse of :math:`project3dToPixel`.
+        This is the inverse of :math:`project_3d_to_pixel`.
         """
         x = (uv[0] - self.cx()) / self.fx()
         y = (uv[1] - self.cy()) / self.fy()
@@ -143,7 +199,37 @@ class PinholeCameraModel:
         z = 1.0 / norm
         return (x, y, z)
 
-    def getDeltaU(self, deltaX, Z):
+    def projectPixelTo3dRay(self, uv)->tuple[float,float,float]:
+        """
+        :param uv:        rectified pixel coordinates
+        :type uv:         (u, v)
+        :rtype:           tuple[float,float,float]
+
+        PinholeCameraModel.projectPixelTo3dRay() is depricated. Please use project_pixel_to_3d_ray()
+        Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
+        using the camera :math:`P` matrix.
+        This is the inverse of :math:`project_3d_to_pixel`.
+        """
+        warnings.warn("PinholeCameraModel.projectPixelTo3dRay() is depricated. Please use project_pixel_to_3d_ray()", DeprecationWarning) 
+        return self.project_pixel_to_3d_ray(uv)
+
+    def get_delta_u(self, delta_x, z)->float:
+        """
+        :param delta_x:         delta X, in cartesian space
+        :type delta_x:          float
+        :param z:               Z, in cartesian space
+        :type z:                float
+        :rtype:                 float
+
+        Compute delta u, given Z and delta X in Cartesian space.
+        For given Z, this is the inverse of :math:`get_delta_x`.
+        """
+        if z == 0:
+            return float('inf')
+        else:
+            return self.fx() * delta_x / z
+
+    def getDeltaU(self, deltaX, Z)->float:
         """
         :param deltaX:          delta X, in cartesian space
         :type deltaX:           float
@@ -151,15 +237,30 @@ class PinholeCameraModel:
         :type Z:                float
         :rtype:                 float
 
+        PinholeCameraModel.getDeltaU() is depricated. Please use get_delta_u()
         Compute delta u, given Z and delta X in Cartesian space.
-        For given Z, this is the inverse of :math:`getDeltaX`.
+        For given Z, this is the inverse of :math:`get_delta_x`.
         """
-        if Z == 0:
+        warnings.warn("PinholeCameraModel.getDeltaU() is depricated. Please use get_delta_u()", DeprecationWarning) 
+        return self.get_delta_u(deltaX, Z)
+
+    def get_delta_v(self, delta_y, z)->float:
+        """
+        :param delta_y:         delta Y, in cartesian space
+        :type delta_y:          float
+        :param z:               Z, in cartesian space
+        :type z:                float
+        :rtype:                 float
+
+        Compute delta v, given Z and delta Y in Cartesian space.
+        For given Z, this is the inverse of :math:`get_delta_y`.
+        """
+        if z == 0:
             return float('inf')
         else:
-            return self.fx() * deltaX / Z
+            return self.fy() * delta_y / z
 
-    def getDeltaV(self, deltaY, Z):
+    def getDeltaV(self, deltaY, Z)->float:
         """
         :param deltaY:          delta Y, in cartesian space
         :type deltaY:           float
@@ -168,14 +269,14 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta v, given Z and delta Y in Cartesian space.
-        For given Z, this is the inverse of :math:`getDeltaY`.
-        """
-        if Z == 0:
-            return float('inf')
-        else:
-            return self.fy() * deltaY / Z
+        For given Z, this is the inverse of :math:`get_delta_y`.
 
-    def getDeltaX(self, deltaU, Z):
+        PinholeCameraModel.getDeltaV() is depricated. Please use get_delta_v()
+        """
+        warnings.warn("PinholeCameraModel.getDeltaV() is depricated. Please use get_delta_v()", DeprecationWarning) 
+        return(self.get_delta_v(deltaY,Z))    
+
+    def get_delta_x(self, delta_u, z)->float:
         """
         :param deltaU:          delta u in pixels
         :type deltaU:           float
@@ -184,11 +285,39 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta X, given Z in cartesian space and delta u in pixels.
-        For given Z, this is the inverse of :math:`getDeltaU`.
+        For given Z, this is the inverse of :math:`get_delta_u`.
         """
-        return Z * deltaU / self.fx()
+        return z * delta_u / self.fx()
 
-    def getDeltaY(self, deltaV, Z):
+    def getDeltaX(self, deltaU, Z)->float:
+        """
+        :param deltaU:          delta u in pixels
+        :type deltaU:           float
+        :param Z:               Z, in cartesian space
+        :type Z:                float
+        :rtype:                 float
+
+        PinholeCameraModel.getDeltaX() is depricated. Please use get_delta_x()
+        Compute delta X, given Z in cartesian space and delta u in pixels.
+        For given Z, this is the inverse of :math:`get_delta_u`.
+        """
+        warnings.warn("PinholeCameraModel.getDeltaX() is depricated. Please use get_delta_x()", DeprecationWarning)
+        return self.get_delta_x(deltaU,Z)
+
+    def get_delta_y(self, delta_v, z)->float:
+        """
+        :param delta_v:         delta v in pixels
+        :type delta_v:          float
+        :param z:               Z, in cartesian space
+        :type z:                float
+        :rtype:                 float
+
+        Compute delta Y, given Z in cartesian space and delta v in pixels.
+        For given Z, this is the inverse of :math:`get_delta_v`.
+        """
+        return z * delta_v / self.fy()
+
+    def getDeltaY(self, deltaV, Z)->float:
         """
         :param deltaV:          delta v in pixels
         :type deltaV:           float
@@ -197,9 +326,18 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta Y, given Z in cartesian space and delta v in pixels.
-        For given Z, this is the inverse of :math:`getDeltaV`.
+        For given Z, this is the inverse of :math:`get_delta_v`.
         """
-        return Z * deltaV / self.fy()
+        warnings.warn("PinholeCameraModel.getDeltaY() is depricated. Please use get_delta_y()", DeprecationWarning)
+        return self.get_delta_y(deltaV,Z)
+
+    def full_resolution(self)->tuple[int, int]:
+        """
+        :rtype:                 tuple[int, int]
+
+        Returns the full resolution of the camera as a tuple in the format (width, height)
+        """
+        return self._resolution
 
     def fullResolution(self)->tuple[int, int]:
         """
@@ -207,7 +345,16 @@ class PinholeCameraModel:
 
         Returns the full resolution of the camera as a tuple in the format (width, height)
         """
-        return self._resolution
+        warnings.warn("PinholeCameraModel.fullResolution() is depricated. Please use full_resolution()", DeprecationWarning)
+        return self.full_resolution()
+
+    def intrinsic_matrix(self)->numpy.ndarray:
+        """ 
+        :rtype:                 numpy.ndarray
+
+        Returns :math:`K`, also called camera_matrix in cv docs 
+        """
+        return self._k
     
     def intrinsicMatrix(self)->numpy.matrix:
         """ 
@@ -217,8 +364,16 @@ class PinholeCameraModel:
         Returns :math:`K`, also called camera_matrix in cv docs 
         """
         warnings.warn("PinholeCameraModel.intrinsicMatrix()->numpy.matrix is depricated. Please use intrinsic_matrix()->numpy.ndarray", DeprecationWarning)
-        return self._k
+        return numpy.matrix(self.intrinsic_matrix(), dtype="float64")
 
+    def distortion_coeffs(self)->numpy.ndarray:
+        """ 
+        :rtype:                 numpy.ndarray
+        
+        Returns :math:`D` 
+        """
+        return self._d
+    
     def distortionCoeffs(self)->numpy.matrix:
         """ 
         :rtype:                 numpy.matrix
@@ -227,8 +382,16 @@ class PinholeCameraModel:
         Returns :math:`D` 
         """
         warnings.warn("PinholeCameraModel.distortionCoeffs()->numpy.matrix is depricated. Please use distortion_coeffs()->numpy.ndarray", DeprecationWarning)
-        return self._d
+        return numpy.matrix(self.distortion_coeffs(), dtype="float64")
 
+    def rotation_matrix(self)->numpy.ndarray:
+        """ 
+        :rtype:                 numpy.ndarray
+
+        Returns :math:`R` 
+        """
+        return self._r
+    
     def rotationMatrix(self)->numpy.matrix:
         """ 
         :rtype:                 numpy.matrix
@@ -237,7 +400,7 @@ class PinholeCameraModel:
         Returns :math:`R` 
         """
         warnings.warn("PinholeCameraModel.rotationMatrix()->numpy.matrix is depricated. Please use rotation_matrix()->numpy.ndarray", DeprecationWarning)
-        return self._r
+        return np.matrix(self.rotation_matrix(), dtype='float64')
 
     def projection_matrix(self) ->numpy.ndarray:
         """ 
@@ -258,6 +421,14 @@ class PinholeCameraModel:
         return np.matrix(self.projection_matrix(), dtype='float64')
 
 
+    def full_intrinsic_matrix(self) -> numpy.ndarray:
+        """ 
+        :rtype:                 numpy.ndarray
+
+        Return the original camera matrix for full resolution 
+        """
+        return self._full_K
+
     def fullIntrinsicMatrix(self) -> numpy.matrix:
         """ 
         :rtype:                 numpy.matrix
@@ -266,7 +437,14 @@ class PinholeCameraModel:
         Return the original camera matrix for full resolution 
         """
         warnings.warn("PinholeCameraModel.fullIntrinsicMatrix()->numpy.matrix is depricated. Please use full_intrinsic_matrix()->numpy.ndarray", DeprecationWarning)        
-        return self._full_K
+        return numpy.matrix(self.full_intrinsic_matrix(), dtype='float64')
+
+    def full_projection_matrix(self)->numpy.ndarray:
+        """ 
+        :rtype:                 numpy.ndarray
+
+        Return the projection matrix for full resolution """
+        return self._full_P
 
     def fullProjectionMatrix(self)->numpy.matrix:
         """ 
@@ -275,8 +453,8 @@ class PinholeCameraModel:
         PinholeCameraModel.fullProjectionMatrix()->numpy.matrix is depricated. Please use full_projection_matrix()->numpy.ndarray
         Return the projection matrix for full resolution """
         warnings.warn("PinholeCameraModel.fullProjectionMatrix()->numpy.matrix is depricated. Please use full_projection_matrix()->numpy.ndarray", DeprecationWarning)        
-        return self._full_P
-
+        return numpy.matrix(self.full_projection_matrix(), dtype='float64')
+    
     def cx(self)->float:
         """ 
         :rtype:                 float      
@@ -308,7 +486,7 @@ class PinholeCameraModel:
         """
         return self._p[1,1]
 
-    def Tx(self)->float:
+    def tx(self)->float:
         """ 
         :rtype:                 float      
         
@@ -316,7 +494,17 @@ class PinholeCameraModel:
         """
         return self._p[0,3]
 
-    def Ty(self)->float:
+    def Tx(self)->float:
+        """ 
+        :rtype:                 float      
+
+        PinholeCameraModel.Tx() is depricated. Please use PinholeCameraModel.tx()
+        Return the x-translation term of the projection matrix 
+        """
+        warnings.warn("PinholeCameraModel.Tx() is depricated. Please use PinholeCameraModel.tx()", DeprecationWarning)
+        return self.tx()
+
+    def ty(self)->float:
         """ 
         :rtype:                 float      
         
@@ -324,7 +512,17 @@ class PinholeCameraModel:
         """
         return self._p[1,3]
 
-    def fovX(self)->float:
+    def Ty(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        PinholeCameraModel.Ty() is depricated. Please use PinholeCameraModel.ty()
+        Return the y-translation term of the projection matrix 
+        """
+        warnings.warn("PinholeCameraModel.Ty() is depricated. Please use PinholeCameraModel.ty()", DeprecationWarning)
+        return self.ty()
+    
+    def fov_x(self)->float:
         """ 
         :rtype:                 float      
         
@@ -333,7 +531,17 @@ class PinholeCameraModel:
         """
         return 2 * math.atan(self._width / (2 * self.fx()))
 
-    def fovY(self)->float:
+    def fovX(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        Returns the horizontal field of view in radians.
+        Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
+        """
+        warnings.warn("PinholeCameraModel.fovX() is depricated. Please use PinholeCameraModel.fov_x()", DeprecationWarning)
+        return self.fov_x()
+
+    def fov_y(self)->float:
         """ 
         :rtype:                 float      
         
@@ -342,7 +550,18 @@ class PinholeCameraModel:
         """
         return 2 * math.atan(self._height / (2 * self.fy()))
 
-    def tfFrame(self)->str:
+    def fovY(self)->float:
+        """ 
+        :rtype:                 float      
+        
+        PinholeCameraModel.fovY() is depricated. Please use PinholeCameraModel.fov_y()
+        Returns the vertical field of view in radians.
+        Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
+        """
+        warnings.warn("PinholeCameraModel.fovY() is depricated. Please use PinholeCameraModel.fov_y()", DeprecationWarning)
+        return self.fov_y()
+
+    def tf_frame(self)->str:
         """ 
         :rtype:                 str      
         
@@ -350,6 +569,17 @@ class PinholeCameraModel:
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         return self._tf_frame
+
+    def tfFrame(self)->str:
+        """ 
+        :rtype:                 str      
+        
+
+        Returns the tf frame name - a string - of the camera.
+        This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
+        """
+        warnings.warn("PinholeCameraModel.tfFrame() is depricated. Please use PinholeCameraModel.tf_frame()", DeprecationWarning)
+        return self.tf_frame()
 
 class StereoCameraModel:
     """
@@ -360,7 +590,7 @@ class StereoCameraModel:
         self._right = PinholeCameraModel()
         self._q = None
 
-    def fromCameraInfo(self, left_msg, right_msg):
+    def from_camera_info(self, left_msg, right_msg):
         """
         :param left_msg: left camera parameters
         :type left_msg:  sensor_msgs.msg.CameraInfo
@@ -369,8 +599,8 @@ class StereoCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` messages.
         """
-        self._left.fromCameraInfo(left_msg)
-        self._right.fromCameraInfo(right_msg)
+        self._left.from_camera_info(left_msg)
+        self._right.from_camera_info(right_msg)
 
         # [ Fx, 0,  Cx,  Fx*-Tx ]
         # [ 0,  Fy, Cy,  0      ]
@@ -396,39 +626,79 @@ class StereoCameraModel:
         self._q[2, 3] = fx
         self._q[3, 2] = 1 / tx
 
-    def tfFrame(self)->str:
+    def fromCameraInfo(self, left_msg, right_msg):
+        """
+        :param left_msg: left camera parameters
+        :type left_msg:  sensor_msgs.msg.CameraInfo
+        :param right_msg: right camera parameters
+        :type right_msg:  sensor_msgs.msg.CameraInfo
+
+        StereoCameraModel.fromCameraInfo()->None is depricated. Please use from_camera_info()->None
+        Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` messages.
+        """
+
+        warnings.warn("StereoCameraModel.fromCameraInfo()->None is depricated. Please use from_camera_info()->None", DeprecationWarning)  
+        self.from_camera_info(left_msg,right_msg)
+
+    def tf_frame(self)->str:
         """ 
         :rtype:                 str      
         
         Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
+        return self._left.tf_frame()
 
-        return self._left.tfFrame()
+    def tfFrame(self)->str:
+        """ 
+        :rtype:                 str      
+        
+        StereoCameraModel.tfFrame() is depricated. Please use tf_frame()
+        Returns the tf frame name - a string - of the camera.
+        This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
+        """
+        warnings.warn("StereoCameraModel.tfFrame() is depricated. Please use tf_frame()", DeprecationWarning)  
+        return self.tf_frame()
+
+    def project_3d_to_pixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
+        """
+        :param point:     3D point
+        :type point:      (x, y, z)
+        :rtype:           tuple[tuple[float,float],tuple[float,float]]
+        
+        Returns the rectified pixel coordinates (u, v) of the 3D point, for each camera, as ((u_left, v_left), (u_right, v_right))
+        using the cameras' :math:`P` matrices.
+        This is the inverse of :math:`projectPixelTo3d`.
+        """
+        l = self._left.project_3d_to_pixel(point)
+        r = self._right.project_3d_to_pixel(point)
+        return (l, r)
 
     def project3dToPixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
         """
         :param point:     3D point
         :type point:      (x, y, z)
-
+        :rtype:           tuple[tuple[float,float],tuple[float,float]]
+        
+        SteroCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()
         Returns the rectified pixel coordinates (u, v) of the 3D point, for each camera, as ((u_left, v_left), (u_right, v_right))
         using the cameras' :math:`P` matrices.
         This is the inverse of :math:`projectPixelTo3d`.
         """
-        l = self._left.project3dToPixel(point)
-        r = self._right.project3dToPixel(point)
-        return (l, r)
+        warnings.warn("SteroCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()")
+        self.project_3d_to_pixel(point)
 
-    def projectPixelTo3d(self, left_uv, disparity):
+    def project_pixel_to_3d(self, left_uv, disparity)->tuple[float,float,float]:
         """
         :param left_uv:        rectified pixel coordinates
         :type left_uv:         (u, v)
-        :param disparity:        disparity, in pixels
-        :type disparity:         float
+        :param disparity:      disparity, in pixels
+        :type disparity:       float
+        :rtype                 tuple[float,float,float] 
 
         Returns the 3D point (x, y, z) for the given pixel position,
         using the cameras' :math:`P` matrices.
-        This is the inverse of :math:`project3dToPixel`.
+        This is the inverse of :math:`project_3d_to_pixel`.
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
@@ -443,10 +713,29 @@ class StereoCameraModel:
         else:
             return (0.0, 0.0, 0.0)
 
-    def getZ(self, disparity):
+    def projectPixelTo3d(self, left_uv, disparity)->tuple[float,float,float]:
+        """
+        :param left_uv:        rectified pixel coordinates
+        :type left_uv:         (u, v)
+        :param disparity:      disparity, in pixels
+        :type disparity:       float
+        :rtype                 tuple[float,float,float] 
+
+        SteroCameraModel.projectPixelTo3d() is deprecated. Please use project_pixel_to_3d()
+        Returns the 3D point (x, y, z) for the given pixel position,
+        using the cameras' :math:`P` matrices.
+        This is the inverse of :math:`project3dToPixel`.
+
+        Note that a disparity of zero implies that the 3D point is at infinity.
+        """
+        warnings.warn("SteroCameraModel.projectPixelTo3d() is deprecated. Please use project_pixel_to_3d()")
+        return self.project_pixel_to_3d(left_uv,disparity)
+
+    def get_z(self, disparity)->float:
         """
         :param disparity:        disparity, in pixels
         :type disparity:         float
+        :rtype                   float
 
         Returns the depth at which a point is observed with a given disparity.
         This is the inverse of :math:`getDisparity`.
@@ -455,21 +744,49 @@ class StereoCameraModel:
         """
         if disparity == 0:
             return float('inf')
-        Tx = -self._right.projectionMatrix()[0, 3]
+        Tx = -self._right.projection_matrix()[0, 3]
         return Tx / disparity
+
+    def getZ(self, disparity)->float:
+        """
+        :param disparity:        disparity, in pixels
+        :type disparity:         float
+        :rtype                   float
+
+        SteroCameraModel.getZ() is deprecated. Please use get_z()
+        Returns the depth at which a point is observed with a given disparity.
+        This is the inverse of :math:`getDisparity`.
+
+        Note that a disparity of zero implies Z is infinite.
+        """
+        warnings.warn("SteroCameraModel.getZ() is deprecated. Please use get_z()")
+        return self.get_z(disparity)
+
+    def get_disparity(self, z):
+        """
+        :param z:          Z (depth), in cartesian space
+        :type z:           float
+        :rtype:            float
+
+        Returns the disparity observed for a point at depth Z.
+        This is the inverse of :math:`getZ`.
+        """
+        if z == 0:
+            return float('inf')
+        tx = -self._right.projection_matrix()[0, 3]
+        return tx / z
 
     def getDisparity(self, Z):
         """
         :param Z:          Z (depth), in cartesian space
         :type Z:           float
 
+        SteroCameraModel.getDisparity() is deprecated. Please use get_disparity()
         Returns the disparity observed for a point at depth Z.
         This is the inverse of :math:`getZ`.
         """
-        if Z == 0:
-            return float('inf')
-        Tx = -self._right.projection_matrix()[0, 3]
-        return Tx / Z
+        warnings.warn("SteroCameraModel.getDisparity() is deprecated. Please use get_disparity()")
+        return self.get_disparity(Z)
     
     
     def get_left_camera(self)->PinholeCameraModel:
