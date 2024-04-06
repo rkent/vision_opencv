@@ -3,3 +3,5 @@ build*/
 *.pyc
 .*
 *~
+image_geometry/doc/doctrees/
+image_geometry/doc/html/
