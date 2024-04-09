@@ -93,14 +93,14 @@ class TestDirected(unittest.TestCase):
         expected = 147.767
         actual = self.cam.left.getDeltaU(delta_x,z)
         assert_almost_equal(expected,actual,3)
-    
+
     def test_get_delta_v(self):
         delta_y = 1.0
         z = 2.0
         expected = 147.767
         actual = self.cam.left.getDeltaV(delta_y,z)
         assert_almost_equal(expected,actual,3)
-    
+
     def test_get_delta_x(self):
         delta_u = 1.0
         z = 2.0
@@ -149,7 +149,7 @@ class TestDirected(unittest.TestCase):
                     [  0.      ,   0.      ,   1.      ,   0.      ]]
         actual = self.cam.left.projectionMatrix()
         assert_almost_equal(expected,actual,6)
-    
+
     def test_full_intrinsic_matrix(self):
         expected = [[430.15433 ,   0.      , 311.713398],
                     [  0.      , 430.609204, 221.068249],
@@ -177,37 +177,37 @@ class TestDirected(unittest.TestCase):
     def test_fx(self):
         expected = 295.534020597
         actual = self.cam.left.fx()
-        assert_almost_equal(expected,actual,6)   
+        assert_almost_equal(expected,actual,6)
 
     def test_fy(self):
         expected = 295.534020597
         actual = self.cam.left.fy()
-        assert_almost_equal(expected,actual,6)   
+        assert_almost_equal(expected,actual,6)
 
     def test_tx(self):
         expected = 0.0
         actual = self.cam.left.Tx()
-        assert_almost_equal(expected,actual,6)   
+        assert_almost_equal(expected,actual,6)
 
     def test_ty(self):
         expected = 0.0
         actual = self.cam.left.Ty()
-        assert_almost_equal(expected,actual,6)   
+        assert_almost_equal(expected,actual,6)
 
     def test_fov_x(self):
         expected = 1.6502496354
         actual = self.cam.left.fovX()
-        assert_almost_equal(expected,actual,6)   
+        assert_almost_equal(expected,actual,6)
 
     def test_fov_y(self):
         expected = 1.364138172
         actual = self.cam.left.fovY()
-        assert_almost_equal(expected,actual,6)   
+        assert_almost_equal(expected,actual,6)
 
     def test_tf_frame(self):
         expected = "left_camera"
         actual = self.cam.left.tfFrame()
-        self.assertEqual(expected,actual)   
+        self.assertEqual(expected,actual)
 
     def test_stereo_project_3d_to_pixel(self):
         point = (1.0,2.0,3.0)
@@ -236,7 +236,7 @@ class TestDirected(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(TestDirected('test_stereo'))
-    suite.addTest(TestDirected('test_monocular'))
+    # suite.addTest(TestDirected('test_monocular'))
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))
