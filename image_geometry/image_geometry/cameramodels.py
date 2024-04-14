@@ -736,8 +736,8 @@ class StereoCameraModel:
         using the cameras' :math:`P` matrices.
         This is the inverse of :math:`projectPixelTo3d`.
         """
-        warnings.warn("SteroCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()")
-        self.project_3d_to_pixel(point)
+        warnings.warn("SteroCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()",DeprecationWarning)
+        return self.project_3d_to_pixel(point)
 
     def project_pixel_to_3d(self, left_uv, disparity)->tuple[float,float,float]:
         """
@@ -781,7 +781,7 @@ class StereoCameraModel:
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
-        warnings.warn("SteroCameraModel.projectPixelTo3d() is deprecated. Please use project_pixel_to_3d()")
+        warnings.warn("SteroCameraModel.projectPixelTo3d() is deprecated. Please use project_pixel_to_3d()", DeprecationWarning)
         return self.project_pixel_to_3d(left_uv,disparity)
 
     def get_z(self, disparity)->float:
@@ -814,7 +814,7 @@ class StereoCameraModel:
 
         Note that a disparity of zero implies Z is infinite.
         """
-        warnings.warn("SteroCameraModel.getZ() is deprecated. Please use get_z()")
+        warnings.warn("SteroCameraModel.getZ() is deprecated. Please use get_z()", DeprecationWarning)
         return self.get_z(disparity)
 
     def get_disparity(self, z)->float:
@@ -843,7 +843,7 @@ class StereoCameraModel:
         Returns the disparity observed for a point at depth Z.
         This is the inverse of :math:`getZ`.
         """
-        warnings.warn("SteroCameraModel.getDisparity() is deprecated. Please use get_disparity()")
+        warnings.warn("SteroCameraModel.getDisparity() is deprecated. Please use get_disparity()",DeprecationWarning)
         return self.get_disparity(Z)
     
     
