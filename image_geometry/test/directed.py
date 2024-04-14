@@ -4,6 +4,7 @@ import unittest
 import sensor_msgs.msg
 
 from image_geometry import PinholeCameraModel, StereoCameraModel
+import numpy as np
 from numpy.testing import assert_almost_equal
 
 class TestDirected(unittest.TestCase):
@@ -33,16 +34,16 @@ class TestDirected(unittest.TestCase):
         self.cam = StereoCameraModel()
         self.cam.from_camera_info(self.lmsg, self.rmsg)
 
-    def test_monocular(self):
-        ci = sensor_msgs.msg.CameraInfo()
-        ci.width = 640
-        ci.height = 480
-        print(ci)
-        cam = PinholeCameraModel()
-        cam.from_camera_info(ci)
-        print(cam.rectify_point((0, 0)))
+    # def test_monocular(self):
+    #     ci = sensor_msgs.msg.CameraInfo()
+    #     ci.width = 640
+    #     ci.height = 480
+    #     print(ci)
+    #     cam = PinholeCameraModel()
+    #     cam.from_camera_info(ci)
+    #     print(cam.rectify_point((0, 0)))
 
-        print(cam.project_3d_to_pixel((0,0,0)))
+    #     print(cam.project_3d_to_pixel((0,0,0)))
 
     def test_stereo(self):
         for x in (16, 320, self.width - 16):
@@ -68,6 +69,25 @@ class TestDirected(unittest.TestCase):
         self.assertAlmostEqual(self.cam.get_left_camera().get_delta_v(xyz1[1] - xyz0[1], Z), dv, 3)
         self.assertAlmostEqual(self.cam.get_left_camera().get_delta_x(du, Z), xyz1[0] - xyz0[0], 3)
         self.assertAlmostEqual(self.cam.get_left_camera().get_delta_y(dv, Z), xyz1[1] - xyz0[1], 3)
+
+    def test_rectify_image(self):
+        h=480
+        w=640
+        expected = [12,13,14]
+        raw = np.zeros((h, w, 3), np.uint8)
+        rectified = np.zeros((h, w, 3), np.uint8)
+
+        for i in range(480):
+            for j in range(640):
+                for k in range(3):
+                    raw[i,j,k] = (i+j+k) % 256         
+
+        self.cam.get_left_camera().rectify_image(raw, rectified)
+        assert_almost_equal(expected, rectified[56,47])
+        with self.assertWarns(DeprecationWarning):
+            self.cam.get_left_camera().rectifyImage(raw,rectified)
+            assert_almost_equal(expected, rectified[56,47])
+
 
     def test_rectify_point(self):
         uv_raw = (1.0, 2.0)
@@ -354,6 +374,7 @@ class TestDirected(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(TestDirected('test_stereo'))
+    suite.addTest(TestDirected('test_rectify_image'))
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))
