@@ -258,13 +258,19 @@ class TestDirected(unittest.TestCase):
             actual = self.cam.get_left_camera().fovY()
             assert_almost_equal(expected,actual,6)   
 
-    def test_tf_frame(self):
+    def test_get_tf_frame(self):
         expected = "left_camera"
-        actual = self.cam.get_left_camera().tf_frame()
+        actual = self.cam.get_left_camera().get_tf_frame()
         self.assertEqual(expected,actual)   
         with self.assertWarns(DeprecationWarning):
             actual = self.cam.get_left_camera().tfFrame()
-            self.assertEqual(expected,actual)   
+            self.assertEqual(expected,actual)
+        actual = self.cam.get_tf_frame()
+        self.assertEqual(expected,actual)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.tfFrame()
+            self.assertEqual(expected,actual)
+
 
     def test_stereo_project_3d_to_pixel(self):
         point = (1.0,2.0,3.0)
@@ -304,10 +310,44 @@ class TestDirected(unittest.TestCase):
             assert_almost_equal(expected, actual, 6)
 
     def test_deprecation(self):
+        pinholeCam = self.cam.get_left_camera()
         with self.assertWarns(DeprecationWarning):
             self.cam.get_left_camera().fromCameraInfo(self.lmsg)
         with self.assertWarns(DeprecationWarning):
             self.cam.fromCameraInfo(self.lmsg, self.rmsg)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.K, pinholeCam._k)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.D, pinholeCam._d)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.R, pinholeCam._r)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.P, pinholeCam._p)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.full_K, pinholeCam._full_k)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.full_P, pinholeCam._full_p)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.width, pinholeCam._width)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.height, pinholeCam._height)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.binning_x, pinholeCam._binning_x)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.binning_y, pinholeCam._binning_y)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.raw_roi, pinholeCam._raw_roi)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.tf_frame, pinholeCam._tf_frame)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.stamp, pinholeCam._stamp)
+        with self.assertWarns(DeprecationWarning):
+            self.assertIs(self.cam.left, self.cam.get_left_camera())
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(self.cam.right, self.cam.get_right_camera())
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(self.cam.Q, self.cam._q)
+        
 
 
 
@@ -336,7 +376,7 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_ty'))
     suite.addTest(TestDirected('test_fov_x'))
     suite.addTest(TestDirected('test_fov_y'))
-    suite.addTest(TestDirected('test_tf_frame'))
+    suite.addTest(TestDirected('test_get_tf_frame'))
     suite.addTest(TestDirected('test_stereo_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_stereo_project_pixel_to_3d'))
     suite.addTest(TestDirected('test_stereo_get_z'))
