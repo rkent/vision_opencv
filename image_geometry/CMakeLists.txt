@@ -45,9 +45,7 @@ install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
-  target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME})
+  add_subdirectory(test)
 endif()
 
 ament_export_targets(export_${PROJECT_NAME})
