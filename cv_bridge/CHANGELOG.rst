@@ -2,6 +2,16 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.0 (2024-04-13)
+------------------
+* Decode images in mode IMREAD_UNCHANGED (`#520 <https://github.com/ros-perception/vision_opencv/issues/520>`_)
+* Remove header files that were deprecated in I-turtle (`#517 <https://github.com/ros-perception/vision_opencv/issues/517>`_)
+* Fixed converstion for 32FC1 (`#514 <https://github.com/ros-perception/vision_opencv/issues/514>`_)
+* Allow users to override encoding string in ROSCvMatContainer (`#505 <https://github.com/ros-perception/vision_opencv/issues/505>`_)
+* Ensure dynamic scaling works when given matrix with inf, -inf and nan values. (`#498 <https://github.com/ros-perception/vision_opencv/issues/498>`_)
+* Add new CMake option CV_BRIDGE_DISABLE_PYTHON to cv_bridge to disable building Python support if desired (`#494 <https://github.com/ros-perception/vision_opencv/issues/494>`_)
+* Contributors: Alejandro Hernández Cordero, Christian Rauch, Kenji Brameld, Lightech, Yadunund, ijnek
+
 3.4.0 (2022-10-03)
 ------------------
 

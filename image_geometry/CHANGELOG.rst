@@ -2,6 +2,14 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.0 (2024-04-13)
+------------------
+* Add unit tests for all public members (`#526 <https://github.com/ros-perception/vision_opencv/pull/526>`_)
+* Remove header files that were deprecated in I-turtle (`#517 <https://github.com/ros-perception/vision_opencv/issues/517>`_)
+* Use c++17 (`#515 <https://github.com/ros-perception/vision_opencv/issues/515>`_)
+* Remove unused travis file
+* Contributors: Kenji Brameld, Scott Monaghan, andrea, ijnek
+
 3.4.0 (2022-10-03)
 ------------------
 * Add fovX and fovY functions in python, cpp (`#493 <https://github.com/ros-perception/vision_opencv/issues/493>`_)

@@ -93,14 +93,14 @@ class TestDirected(unittest.TestCase):
         expected = 147.767
         actual = self.cam.get_left_camera().get_delta_u(delta_x,z)
         assert_almost_equal(expected,actual,3)
-    
+
     def test_get_delta_v(self):
         delta_y = 1.0
         z = 2.0
         expected = 147.767
         actual = self.cam.get_left_camera().get_delta_v(delta_y,z)
         assert_almost_equal(expected,actual,3)
-    
+
     def test_get_delta_x(self):
         delta_u = 1.0
         z = 2.0
@@ -149,7 +149,7 @@ class TestDirected(unittest.TestCase):
                     [  0.      ,   0.      ,   1.      ,   0.      ]]
         actual = self.cam.get_left_camera().projection_matrix()
         assert_almost_equal(expected,actual,6)
-    
+
     def test_full_intrinsic_matrix(self):
         expected = [[430.15433 ,   0.      , 311.713398],
                     [  0.      , 430.609204, 221.068249],
@@ -236,7 +236,7 @@ class TestDirected(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(TestDirected('test_stereo'))
-    suite.addTest(TestDirected('test_monocular'))
+    # suite.addTest(TestDirected('test_monocular'))
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))
