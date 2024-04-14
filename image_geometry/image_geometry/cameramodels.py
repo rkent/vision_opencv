@@ -4,6 +4,7 @@ import copy
 import numpy
 import numpy as np
 import warnings
+from deprecated.sphinx import deprecated
 
 def mkmat(rows, cols, L) -> numpy.ndarray:
     mat = np.array(L,dtype='float64')
@@ -73,17 +74,17 @@ class PinholeCameraModel:
         self._p[0,2] = (self._p[0,2] - self._raw_roi.x_offset) / self._binning_x
         self._p[1,2] = (self._p[1,2] - self._raw_roi.y_offset) / self._binning_y
 
+    @deprecated(version="J-turtle", reason="The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.")
     def fromCameraInfo(self,msg)->None:
         """
         .. warning::
-            PinholeCameraModel.fromCameraInfo() is deprecated. Please use from_camera_info().
+            The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.
 
         :param msg: camera parameters
         :type msg:  sensor_msgs.msg.CameraInfo
         
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        warnings.warn("PinholeCameraModel.fromCameraInfo() is deprecated. Please use from_camera_info()", DeprecationWarning)  
         self.from_camera_info(msg)
 
 
@@ -105,10 +106,11 @@ class PinholeCameraModel:
                 (self._width, self._height), cv2.CV_32FC1, self.mapx, self.mapy)
         cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
 
+    @deprecated(version="J-turtle", reason="The rectifyImage() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_image() method instead.")
     def rectifyImage(self, raw, rectified):
         """
         .. warning::
-            PinholeCameraModel.rectifyImage() is deprecated. Please use rectify_image()
+            The rectifyImage() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_image() method instead.
 
         :param raw:       input image
         :type raw:        :class:`CvMat` or :class:`IplImage`
@@ -117,7 +119,6 @@ class PinholeCameraModel:
         
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
         """
-        warnings.warn("PinholeCameraModel.rectifyImage() is deprecated. Please use rectify_image()", DeprecationWarning) 
         self.rectify_image(raw, rectified)
 
     def rectify_point(self, uv_raw)->numpy.ndarray:
@@ -136,10 +137,11 @@ class PinholeCameraModel:
         dst = cv2.undistortPoints(src, self._k, self._d, R=self._r, P=self._p)
         return dst[0,0]
     
+    @deprecated(version="J-turtle", reason="The rectifyPoint() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_point() method instead.")
     def rectifyPoint(self, uv_raw)->numpy.ndarray:
         """
         .. warning::
-            PinholeCameraModel.rectifyPoint()->numpy.ndarray is deprecated. Please use rectify_point()->numpy.ndarray
+            The rectifyPoint() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_point() method instead.
         
         :param uv_raw:    pixel coordinates
         :type uv_raw:     (u, v)
@@ -149,7 +151,6 @@ class PinholeCameraModel:
         :math:`K` and and :math:`D` to point (u, v) and returns the
         pixel coordinates of the rectified point.
         """
-        warnings.warn("PinholeCameraModel.rectifyPoint() is deprecated. Please use rectify_point()", DeprecationWarning) 
         return self.rectify_point(uv_raw)
 
     def project_3d_to_pixel(self, point)->tuple[float,float]:
@@ -172,10 +173,11 @@ class PinholeCameraModel:
         else:
             return (float('nan'), float('nan'))
     
+    @deprecated(version="J-turtle", reason="The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.")
     def project3dToPixel(self, point)->tuple[float,float]:
         """
         .. warning::
-            PinholeCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()
+            The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.
 
         :param point:     3D point
         :type point:      (x, y, z)
@@ -185,7 +187,6 @@ class PinholeCameraModel:
         using the camera :math:`P` matrix.
         This is the inverse of :math:`projectPixelTo3dRay`.
         """
-        warnings.warn("PinholeCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()", DeprecationWarning) 
         return self.project_3d_to_pixel(point)
 
     def project_pixel_to_3d_ray(self, uv)->tuple[float,float,float]:
@@ -206,10 +207,11 @@ class PinholeCameraModel:
         z = 1.0 / norm
         return (x, y, z)
 
+    @deprecated(version="J-turtle", reason="The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.")
     def projectPixelTo3dRay(self, uv)->tuple[float,float,float]:
         """
         .. warning::
-            PinholeCameraModel.projectPixelTo3dRay() is deprecated. Please use project_pixel_to_3d_ray()
+            The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.
         
         :param uv:        rectified pixel coordinates
         :type uv:         (u, v)
@@ -219,7 +221,6 @@ class PinholeCameraModel:
         using the camera :math:`P` matrix.
         This is the inverse of :math:`project_3d_to_pixel`.
         """
-        warnings.warn("PinholeCameraModel.projectPixelTo3dRay() is deprecated. Please use project_pixel_to_3d_ray()", DeprecationWarning) 
         return self.project_pixel_to_3d_ray(uv)
 
     def get_delta_u(self, delta_x, z)->float:
@@ -238,10 +239,11 @@ class PinholeCameraModel:
         else:
             return self.fx() * delta_x / z
 
+    @deprecated(version="J-turtle", reason="The getDeltaU() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_u() method instead.")
     def getDeltaU(self, deltaX, Z)->float:
         """
         .. warning::
-            PinholeCameraModel.getDeltaU() is deprecated. Please use get_delta_u()
+            The getDeltaU() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_u() method instead.
         
         :param deltaX:          delta X, in cartesian space
         :type deltaX:           float
@@ -252,7 +254,6 @@ class PinholeCameraModel:
         Compute delta u, given Z and delta X in Cartesian space.
         For given Z, this is the inverse of :math:`get_delta_x`.
         """
-        warnings.warn("PinholeCameraModel.getDeltaU() is deprecated. Please use get_delta_u()", DeprecationWarning) 
         return self.get_delta_u(deltaX, Z)
 
     def get_delta_v(self, delta_y, z)->float:
@@ -271,10 +272,11 @@ class PinholeCameraModel:
         else:
             return self.fy() * delta_y / z
 
+    @deprecated(version="J-turtle", reason="The getDeltaV() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_v() method instead.")
     def getDeltaV(self, deltaY, Z)->float:
         """
         .. warning::
-            PinholeCameraModel.getDeltaV() is deprecated. Please use get_delta_v()
+            he getDeltaV() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_v() method instead.
 
         :param deltaY:          delta Y, in cartesian space
         :type deltaY:           float
@@ -285,9 +287,8 @@ class PinholeCameraModel:
         Compute delta v, given Z and delta Y in Cartesian space.
         For given Z, this is the inverse of :math:`get_delta_y`.
 
-        PinholeCameraModel.getDeltaV() is deprecated. Please use get_delta_v()
+        PinholeCameraModel.getDeltaV() method is deprecated. Please use get_delta_v()
         """
-        warnings.warn("PinholeCameraModel.getDeltaV() is deprecated. Please use get_delta_v()", DeprecationWarning) 
         return(self.get_delta_v(deltaY,Z))    
 
     def get_delta_x(self, delta_u, z)->float:
@@ -303,10 +304,11 @@ class PinholeCameraModel:
         """
         return z * delta_u / self.fx()
 
+    @deprecated(version="J-turtle", reason="The getDeltaX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_x() method instead.")
     def getDeltaX(self, deltaU, Z)->float:
         """
         .. warning::
-            PinholeCameraModel.getDeltaX() is deprecated. Please use get_delta_x()
+            The getDeltaX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_x() method instead.
         
         :param deltaU:          delta u in pixels
         :type deltaU:           float
@@ -317,7 +319,6 @@ class PinholeCameraModel:
         Compute delta X, given Z in cartesian space and delta u in pixels.
         For given Z, this is the inverse of :math:`get_delta_u`.
         """
-        warnings.warn("PinholeCameraModel.getDeltaX() is deprecated. Please use get_delta_x()", DeprecationWarning)
         return self.get_delta_x(deltaU,Z)
 
     def get_delta_y(self, delta_v, z)->float:
@@ -333,10 +334,11 @@ class PinholeCameraModel:
         """
         return z * delta_v / self.fy()
 
+    @deprecated(version="J-turtle", reason="The getDeltaY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_y() method instead.")
     def getDeltaY(self, deltaV, Z)->float:
         """
         .. warning::
-            PinholeCameraModel.getDeltaY() is deprecated. Please use get_delta_y()
+            The getDeltaY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_y() method instead.
 
         :param deltaV:          delta v in pixels
         :type deltaV:           float
@@ -347,7 +349,6 @@ class PinholeCameraModel:
         Compute delta Y, given Z in cartesian space and delta v in pixels.
         For given Z, this is the inverse of :math:`get_delta_v`.
         """
-        warnings.warn("PinholeCameraModel.getDeltaY() is deprecated. Please use get_delta_y()", DeprecationWarning)
         return self.get_delta_y(deltaV,Z)
 
     def full_resolution(self)->tuple[int, int]:
@@ -358,16 +359,16 @@ class PinholeCameraModel:
         """
         return self._resolution
 
+    @deprecated(version="J-turtle", reason="The fullResolution() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_resolution() method instead.")
     def fullResolution(self)->tuple[int, int]:
         """
         .. warning::
-            PinholeCameraModel.fullResolution() is deprecated. Please use full_resolution()
+            The fullResolution() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_resolution() method instead.
             
         :rtype:                 tuple[int, int]
 
         Returns the full resolution of the camera as a tuple in the format (width, height)
         """
-        warnings.warn("PinholeCameraModel.fullResolution() is deprecated. Please use full_resolution()", DeprecationWarning)
         return self.full_resolution()
 
     def intrinsic_matrix(self)->numpy.ndarray:
@@ -378,16 +379,16 @@ class PinholeCameraModel:
         """
         return self._k
     
+    @deprecated(version="J-turtle", reason="The intrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.")
     def intrinsicMatrix(self)->numpy.matrix:
         """ 
         .. warning::
-            PinholeCameraModel.intrinsicMatrix()->numpy.matrix is deprecated. Please use intrinsic_matrix()->numpy.ndarray
+            The intrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.
         
         :rtype:                 numpy.matrix
 
         Returns :math:`K`, also called camera_matrix in cv docs 
         """
-        warnings.warn("PinholeCameraModel.intrinsicMatrix()->numpy.matrix is deprecated. Please use intrinsic_matrix()->numpy.ndarray", DeprecationWarning)
         return numpy.matrix(self.intrinsic_matrix(), dtype="float64")
 
     def distortion_coeffs(self)->numpy.ndarray:
@@ -398,16 +399,16 @@ class PinholeCameraModel:
         """
         return self._d
     
+    @deprecated(version="J-turtle", reason="The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
     def distortionCoeffs(self)->numpy.matrix:
         """ 
         .. warning::
-            PinholeCameraModel.distortionCoeffs()->numpy.matrix is deprecated. Please use distortion_coeffs()->numpy.ndarray
+            The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead."
         
         :rtype:                 numpy.matrix
         
         Returns :math:`D` 
         """
-        warnings.warn("PinholeCameraModel.distortionCoeffs()->numpy.matrix is deprecated. Please use distortion_coeffs()->numpy.ndarray", DeprecationWarning)
         return numpy.matrix(self.distortion_coeffs(), dtype="float64")
 
     def rotation_matrix(self)->numpy.ndarray:
@@ -418,16 +419,16 @@ class PinholeCameraModel:
         """
         return self._r
     
+    @deprecated(version="J-turtle", reason="The rotationMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.")
     def rotationMatrix(self)->numpy.matrix:
         """ 
         .. warning::
-            PinholeCameraModel.rotationMatrix()->numpy.matrix is deprecated. Please use rotation_matrix()->numpy.ndarray
+            The rotationMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.
         
         :rtype:                 numpy.matrix
 
         Returns :math:`R` 
         """
-        warnings.warn("PinholeCameraModel.rotationMatrix()->numpy.matrix is deprecated. Please use rotation_matrix()->numpy.ndarray", DeprecationWarning)
         return np.matrix(self.rotation_matrix(), dtype='float64')
 
     def projection_matrix(self) ->numpy.ndarray:
@@ -438,16 +439,16 @@ class PinholeCameraModel:
         """
         return self._p
     
+    @deprecated(version="J-turtle", reason="The projectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.")
     def projectionMatrix(self) -> numpy.matrix:
         """ 
         .. warning::
-            PinholeCameraModel.projectionMatrix()->numpy.matrix is deprecated. Please use projection_matrix()->numpy.ndarray
+            The projectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.
         
         :rtype:                 numpy.matrix
 
         Returns :math:`P` 
         """
-        warnings.warn("PinholeCameraModel.projectionMatrix()->numpy.matrix is deprecated. Please use projection_matrix()->numpy.ndarray", DeprecationWarning)
         return np.matrix(self.projection_matrix(), dtype='float64')
 
 
@@ -459,16 +460,16 @@ class PinholeCameraModel:
         """
         return self._full_K
 
+    @deprecated(version="J-turtle", reason="The fullIntrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.")
     def fullIntrinsicMatrix(self) -> numpy.matrix:
         """ 
         .. warning::
-            PinholeCameraModel.fullIntrinsicMatrix()->numpy.matrix is deprecated. Please use full_intrinsic_matrix()->numpy.ndarray"
+            The fullIntrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.
         
         :rtype:                 numpy.matrix
 
         Return the original camera matrix for full resolution 
         """
-        warnings.warn("PinholeCameraModel.fullIntrinsicMatrix()->numpy.matrix is deprecated. Please use full_intrinsic_matrix()->numpy.ndarray", DeprecationWarning)        
         return numpy.matrix(self.full_intrinsic_matrix(), dtype='float64')
 
     def full_projection_matrix(self)->numpy.ndarray:
@@ -478,15 +479,15 @@ class PinholeCameraModel:
         Return the projection matrix for full resolution """
         return self._full_P
 
+    @deprecated(version="J-turtle", reason="The fullProjectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.")
     def fullProjectionMatrix(self)->numpy.matrix:
         """ 
         .. warning::
-            PinholeCameraModel.fullProjectionMatrix()->numpy.matrix is deprecated. Please use full_projection_matrix()->numpy.ndarray
+            The fullProjectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.
         
         :rtype:                 numpy.matrix
 
         Return the projection matrix for full resolution """
-        warnings.warn("PinholeCameraModel.fullProjectionMatrix()->numpy.matrix is deprecated. Please use full_projection_matrix()->numpy.ndarray", DeprecationWarning)        
         return numpy.matrix(self.full_projection_matrix(), dtype='float64')
     
     def cx(self)->float:
@@ -528,16 +529,16 @@ class PinholeCameraModel:
         """
         return self._p[0,3]
 
+    @deprecated(version="J-turtle", reason="The Tx() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tx() method instead.")
     def Tx(self)->float:
         """ 
         .. warning::
-            PinholeCameraModel.Tx() is deprecated. Please use PinholeCameraModel.tx()
+            The Tx() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tx() method instead.
         
         :rtype:                 float      
 
         Return the x-translation term of the projection matrix 
         """
-        warnings.warn("PinholeCameraModel.Tx() is deprecated. Please use PinholeCameraModel.tx()", DeprecationWarning)
         return self.tx()
 
     def ty(self)->float:
@@ -548,16 +549,16 @@ class PinholeCameraModel:
         """
         return self._p[1,3]
 
+    @deprecated(version="J-turtle", reason="The Ty() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the ty() method instead.")
     def Ty(self)->float:
         """ 
         .. warning::
-            PinholeCameraModel.Ty() is deprecated. Please use PinholeCameraModel.ty()
+            The Ty() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the ty() method instead.
         
         :rtype:                 float      
         
         Return the y-translation term of the projection matrix 
         """
-        warnings.warn("PinholeCameraModel.Ty() is deprecated. Please use PinholeCameraModel.ty()", DeprecationWarning)
         return self.ty()
     
     def fov_x(self)->float:
@@ -569,17 +570,17 @@ class PinholeCameraModel:
         """
         return 2 * math.atan(self._width / (2 * self.fx()))
 
+    @deprecated(version="J-turtle", reason="The fovX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_x() method instead.")
     def fovX(self)->float:
         """ 
         .. warning::
-            PinholeCameraModel.fovX() is deprecated. Please use PinholeCameraModel.fov_x()
+            The fovX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_x() method instead.
 
         :rtype:                 float      
         
         Returns the horizontal field of view in radians.
         Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
         """
-        warnings.warn("PinholeCameraModel.fovX() is deprecated. Please use PinholeCameraModel.fov_x()", DeprecationWarning)
         return self.fov_x()
 
     def fov_y(self)->float:
@@ -591,17 +592,17 @@ class PinholeCameraModel:
         """
         return 2 * math.atan(self._height / (2 * self.fy()))
 
+    @deprecated(version="J-turtle", reason="The fovY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_y() method instead.")
     def fovY(self)->float:
         """ 
         .. warning::
-            PinholeCameraModel.fovY() is deprecated. Please use PinholeCameraModel.fov_y()
+            The fovY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_y() method instead.
         
         :rtype:                 float      
         
         Returns the vertical field of view in radians.
         Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
         """
-        warnings.warn("PinholeCameraModel.fovY() is deprecated. Please use PinholeCameraModel.fov_y()", DeprecationWarning)
         return self.fov_y()
 
     def tf_frame(self)->str:
@@ -613,17 +614,17 @@ class PinholeCameraModel:
         """
         return self._tf_frame
 
+    @deprecated(version="J-turtle", reason="The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tf_frame() method instead.")
     def tfFrame(self)->str:
         """ 
         .. warning::
-            PinholeCameraModel.tfFrame() is deprecated. Please use PinholeCameraModel.tf_frame()
+            The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tf_frame() method instead.
 
         :rtype:                 str      
         
         Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        warnings.warn("PinholeCameraModel.tfFrame() is deprecated. Please use PinholeCameraModel.tf_frame()", DeprecationWarning)
         return self.tf_frame()
 
 class StereoCameraModel:
@@ -671,10 +672,11 @@ class StereoCameraModel:
         self._q[2, 3] = fx
         self._q[3, 2] = 1 / tx
 
+    @deprecated(version="J-turtle", reason="The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.")
     def fromCameraInfo(self, left_msg, right_msg):
         """
         .. warning::
-            StereoCameraModel.fromCameraInfo()->None is deprecated. Please use from_camera_info()->None
+            The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.
         
         :param left_msg: left camera parameters
         :type left_msg:  sensor_msgs.msg.CameraInfo
@@ -684,7 +686,6 @@ class StereoCameraModel:
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` messages.
         """
 
-        warnings.warn("StereoCameraModel.fromCameraInfo()->None is deprecated. Please use from_camera_info()->None", DeprecationWarning)  
         self.from_camera_info(left_msg,right_msg)
 
     def tf_frame(self)->str:
@@ -696,17 +697,17 @@ class StereoCameraModel:
         """
         return self._left.tf_frame()
 
+    @deprecated(version="J-turtle", reason="The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tf_frame() method instead.")
     def tfFrame(self)->str:
         """ 
         .. warning::
-            StereoCameraModel.tfFrame() is deprecated. Please use tf_frame()
+            The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tf_frame() method instead.
         
         :rtype:                 str      
         
         Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        warnings.warn("StereoCameraModel.tfFrame() is deprecated. Please use tf_frame()", DeprecationWarning)  
         return self.tf_frame()
 
     def project_3d_to_pixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
@@ -723,10 +724,11 @@ class StereoCameraModel:
         r = self._right.project_3d_to_pixel(point)
         return (l, r)
 
+    @deprecated(version="J-turtle", reason="The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.")
     def project3dToPixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
         """
         .. warning::
-            SteroCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()
+            The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.
 
         :param point:     3D point
         :type point:      (x, y, z)
@@ -736,7 +738,6 @@ class StereoCameraModel:
         using the cameras' :math:`P` matrices.
         This is the inverse of :math:`projectPixelTo3d`.
         """
-        warnings.warn("SteroCameraModel.project3dToPixel() is deprecated. Please use project_3d_to_pixel()",DeprecationWarning)
         return self.project_3d_to_pixel(point)
 
     def project_pixel_to_3d(self, left_uv, disparity)->tuple[float,float,float]:
@@ -764,10 +765,11 @@ class StereoCameraModel:
         else:
             return (0.0, 0.0, 0.0)
 
+    @deprecated(version="J-turtle", reason="The projectPixelTo3d() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d() method instead.")
     def projectPixelTo3d(self, left_uv, disparity)->tuple[float,float,float]:
         """
         .. warning::
-            SteroCameraModel.projectPixelTo3d() is deprecated. Please use project_pixel_to_3d()
+            The projectPixelTo3d() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d() method instead.
         
         :param left_uv:        rectified pixel coordinates
         :type left_uv:         (u, v)
@@ -781,7 +783,6 @@ class StereoCameraModel:
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
-        warnings.warn("SteroCameraModel.projectPixelTo3d() is deprecated. Please use project_pixel_to_3d()", DeprecationWarning)
         return self.project_pixel_to_3d(left_uv,disparity)
 
     def get_z(self, disparity)->float:
@@ -800,10 +801,11 @@ class StereoCameraModel:
         Tx = -self._right.projection_matrix()[0, 3]
         return Tx / disparity
 
+    @deprecated(version="J-turtle", reason="The getZ() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_z() method instead.")
     def getZ(self, disparity)->float:
         """
         .. warning::
-            SteroCameraModel.getZ() is deprecated. Please use get_z()
+            The getZ() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_z() method instead.
         
         :param disparity:        disparity, in pixels
         :type disparity:         float
@@ -814,7 +816,6 @@ class StereoCameraModel:
 
         Note that a disparity of zero implies Z is infinite.
         """
-        warnings.warn("SteroCameraModel.getZ() is deprecated. Please use get_z()", DeprecationWarning)
         return self.get_z(disparity)
 
     def get_disparity(self, z)->float:
@@ -831,10 +832,11 @@ class StereoCameraModel:
         tx = -self._right.projection_matrix()[0, 3]
         return tx / z
 
+    @deprecated(version="J-turtle", reason="The getDisparity() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_disparity() method instead.")
     def getDisparity(self, Z)->float:
         """
         .. warning::
-            SteroCameraModel.getDisparity() is deprecated. Please use get_disparity()
+            The getDisparity() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_disparity() method instead.
         
         :param Z:          Z (depth), in cartesian space
         :type Z:           float
@@ -843,7 +845,6 @@ class StereoCameraModel:
         Returns the disparity observed for a point at depth Z.
         This is the inverse of :math:`getZ`.
         """
-        warnings.warn("SteroCameraModel.getDisparity() is deprecated. Please use get_disparity()",DeprecationWarning)
         return self.get_disparity(Z)
     
     

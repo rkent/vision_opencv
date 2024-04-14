@@ -230,11 +230,17 @@ class TestDirected(unittest.TestCase):
         expected = 0.0
         actual = self.cam.get_left_camera().tx()
         assert_almost_equal(expected,actual,6)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().Tx()
+            assert_almost_equal(expected,actual,6)   
 
     def test_ty(self):
         expected = 0.0
         actual = self.cam.get_left_camera().ty()
         assert_almost_equal(expected,actual,6)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().Ty()
+            assert_almost_equal(expected,actual,6)   
 
     def test_fov_x(self):
         expected = 1.6502496354
@@ -302,6 +308,7 @@ class TestDirected(unittest.TestCase):
             self.cam.get_left_camera().fromCameraInfo(self.lmsg)
         with self.assertWarns(DeprecationWarning):
             self.cam.fromCameraInfo(self.lmsg, self.rmsg)
+
 
 
 if __name__ == '__main__':
