@@ -4,7 +4,8 @@ import unittest
 import sensor_msgs.msg
 
 from image_geometry import PinholeCameraModel, StereoCameraModel
-from numpy.testing import assert_almost_equal, assert_array_equal
+import numpy as np
+from numpy.testing import assert_almost_equal
 
 class TestDirected(unittest.TestCase):
 
@@ -31,25 +32,25 @@ class TestDirected(unittest.TestCase):
         self.rmsg.header.frame_id = "right_camera"
 
         self.cam = StereoCameraModel()
-        self.cam.fromCameraInfo(self.lmsg, self.rmsg)
+        self.cam.from_camera_info(self.lmsg, self.rmsg)
 
-    def test_monocular(self):
-        ci = sensor_msgs.msg.CameraInfo()
-        ci.width = 640
-        ci.height = 480
-        print(ci)
-        cam = PinholeCameraModel()
-        cam.fromCameraInfo(ci)
-        print(cam.rectifyPoint((0, 0)))
+    # def test_monocular(self):
+    #     ci = sensor_msgs.msg.CameraInfo()
+    #     ci.width = 640
+    #     ci.height = 480
+    #     print(ci)
+    #     cam = PinholeCameraModel()
+    #     cam.from_camera_info(ci)
+    #     print(cam.rectify_point((0, 0)))
 
-        print(cam.project3dToPixel((0,0,0)))
+    #     print(cam.project_3d_to_pixel((0,0,0)))
 
     def test_stereo(self):
         for x in (16, 320, self.width - 16):
             for y in (16, 240, self.height - 16):
                 for d in range(1, 10):
-                    pt3d = self.cam.projectPixelTo3d((x, y), d)
-                    ((lx, ly), (rx, ry)) = self.cam.project3dToPixel(pt3d)
+                    pt3d = self.cam.project_pixel_to_3d((x, y), d)
+                    ((lx, ly), (rx, ry)) = self.cam.project_3d_to_pixel(pt3d)
                     self.assertAlmostEqual(y, ly, 3)
                     self.assertAlmostEqual(y, ry, 3)
                     self.assertAlmostEqual(x, lx, 3)
@@ -60,72 +61,118 @@ class TestDirected(unittest.TestCase):
         du = 17.0
         dv = 23.0
         Z = 2.0
-        xyz0 = self.cam.left.projectPixelTo3dRay((u, v))
+        xyz0 = self.cam.get_left_camera().project_pixel_to_3d_ray((u, v))
         xyz0 = (xyz0[0] * (Z / xyz0[2]), xyz0[1] * (Z / xyz0[2]), Z)
-        xyz1 = self.cam.left.projectPixelTo3dRay((u + du, v + dv))
+        xyz1 = self.cam.get_left_camera().project_pixel_to_3d_ray((u + du, v + dv))
         xyz1 = (xyz1[0] * (Z / xyz1[2]), xyz1[1] * (Z / xyz1[2]), Z)
-        self.assertAlmostEqual(self.cam.left.getDeltaU(xyz1[0] - xyz0[0], Z), du, 3)
-        self.assertAlmostEqual(self.cam.left.getDeltaV(xyz1[1] - xyz0[1], Z), dv, 3)
-        self.assertAlmostEqual(self.cam.left.getDeltaX(du, Z), xyz1[0] - xyz0[0], 3)
-        self.assertAlmostEqual(self.cam.left.getDeltaY(dv, Z), xyz1[1] - xyz0[1], 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_u(xyz1[0] - xyz0[0], Z), du, 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_v(xyz1[1] - xyz0[1], Z), dv, 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_x(du, Z), xyz1[0] - xyz0[0], 3)
+        self.assertAlmostEqual(self.cam.get_left_camera().get_delta_y(dv, Z), xyz1[1] - xyz0[1], 3)
+
+    def test_rectify_image(self):
+        h=480
+        w=640
+        expected = [12,13,14]
+        raw = np.zeros((h, w, 3), np.uint8)
+        rectified = np.zeros((h, w, 3), np.uint8)
+
+        for i in range(480):
+            for j in range(640):
+                for k in range(3):
+                    raw[i,j,k] = (i+j+k) % 256         
+
+        self.cam.get_left_camera().rectify_image(raw, rectified)
+        assert_almost_equal(expected, rectified[56,47])
+        with self.assertWarns(DeprecationWarning):
+            self.cam.get_left_camera().rectifyImage(raw,rectified)
+            assert_almost_equal(expected, rectified[56,47])
+
 
     def test_rectify_point(self):
         uv_raw = (1.0, 2.0)
         expected = [48.16447369,45.49210841]
-        actual = self.cam.left.rectifyPoint(uv_raw)
+        actual = self.cam.get_left_camera().rectify_point(uv_raw)
         assert_almost_equal(expected,actual,3)
+        with self.assertWarns(DeprecationWarning):
+            deprecated = self.cam.get_left_camera().rectifyPoint(uv_raw)
+            assert_almost_equal(expected, deprecated, 3)
 
     def test_project_3d_to_pixel(self):
         point = (1.0, 2.0, 3.0)
         expected = [384.069,420.319]
-        actual = self.cam.left.project3dToPixel(point)
+        actual = self.cam.get_left_camera().project_3d_to_pixel(point)
         assert_almost_equal(expected,actual,3)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().project3dToPixel(point)
+            assert_almost_equal(expected,actual,3)
 
     def test_project_pixel_to_3d_ray(self):
         uv = (1.0, 2.0)
         expected = [-0.61,-0.475,0.634]
-        actual = self.cam.left.projectPixelTo3dRay(uv)
+        actual = self.cam.get_left_camera().project_pixel_to_3d_ray(uv)
         assert_almost_equal(expected,actual,3)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().projectPixelTo3dRay(uv)
+            assert_almost_equal(expected,actual,3)
 
     def test_get_delta_u(self):
         delta_x = 1.0
         z = 2.0
         expected = 147.767
-        actual = self.cam.left.getDeltaU(delta_x,z)
+        actual = self.cam.get_left_camera().get_delta_u(delta_x,z)
         assert_almost_equal(expected,actual,3)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().getDeltaU(delta_x,z)
+            assert_almost_equal(expected,actual,3)
 
     def test_get_delta_v(self):
         delta_y = 1.0
         z = 2.0
         expected = 147.767
-        actual = self.cam.left.getDeltaV(delta_y,z)
+        actual = self.cam.get_left_camera().get_delta_v(delta_y,z)
         assert_almost_equal(expected,actual,3)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().getDeltaV(delta_y,z)
+            assert_almost_equal(expected,actual,3)
 
     def test_get_delta_x(self):
         delta_u = 1.0
         z = 2.0
         expected = 0.00676741
-        actual = self.cam.left.getDeltaX(delta_u,z)
+        actual = self.cam.get_left_camera().get_delta_x(delta_u,z)
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().getDeltaX(delta_u,z)
+            assert_almost_equal(expected,actual,6)
 
     def test_get_delta_y(self):
         delta_v = 1.0
         z = 2.0
         expected = 0.00676741
-        actual = self.cam.left.getDeltaY(delta_v,z)
+        actual = self.cam.get_left_camera().get_delta_y(delta_v,z)
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().getDeltaY(delta_v,z)
+            assert_almost_equal(expected,actual,6)
 
     def test_full_resolution(self):
         expected = (640,480)
-        actual = self.cam.left.fullResolution()
+        actual = self.cam.get_left_camera().full_resolution()
         self.assertTupleEqual(expected,actual)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().fullResolution()
+            self.assertTupleEqual(expected,actual)
 
     def test_intrinsic_matrix(self):
         expected = [[430.15433 ,   0.      , 311.713398],
                     [  0.      , 430.609204, 221.068249],
                     [  0.      ,   0.      ,   1.      ]]
-        actual = self.cam.left.intrinsicMatrix()
+        actual = self.cam.get_left_camera().intrinsic_matrix()
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().intrinsicMatrix()
+            assert_almost_equal(expected,actual,6)
 
     def test_distortion_coeffs(self):
         expected = [[-3.63528858e-01],
@@ -133,110 +180,201 @@ class TestDirected(unittest.TestCase):
                     [-8.11095850e-05],
                     [-4.47767123e-04],
                     [ 0.00000000e+00]]
-        actual = self.cam.left.distortionCoeffs()
+        actual = self.cam.get_left_camera().distortion_coeffs()
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().distortionCoeffs()
+            assert_almost_equal(expected,actual,6)
 
     def test_rotation_matrix(self):
         expected = [[ 0.998066,  0.006856,  0.06179 ],
                     [-0.006752,  0.999975, -0.001891],
                     [-0.061802,  0.00147 ,  0.998087]]
-        actual = self.cam.left.rotationMatrix()
+        actual = self.cam.get_left_camera().rotation_matrix()
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().rotationMatrix()
+            assert_almost_equal(expected,actual,6)
 
     def test_projection_matrix(self):
         expected = [[295.534021,   0.      , 285.557608,   0.      ],
                     [  0.      , 295.534021, 223.296179,   0.      ],
                     [  0.      ,   0.      ,   1.      ,   0.      ]]
-        actual = self.cam.left.projectionMatrix()
+        actual = self.cam.get_left_camera().projection_matrix()
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().projectionMatrix()
+            assert_almost_equal(expected,actual,6)
 
     def test_full_intrinsic_matrix(self):
         expected = [[430.15433 ,   0.      , 311.713398],
                     [  0.      , 430.609204, 221.068249],
                     [  0.      ,   0.      ,   1.      ]]
-        actual = self.cam.left.fullIntrinsicMatrix()
+        actual = self.cam.get_left_camera().full_intrinsic_matrix()
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().fullIntrinsicMatrix()
+            assert_almost_equal(expected,actual,6)
 
     def test_full_projection_matrix(self):
         expected = [[295.534021,   0.      , 285.557608,   0.      ],
                     [  0.      , 295.534021, 223.296179,   0.      ],
                     [  0.      ,   0.      ,   1.      ,   0.      ]]
-        actual = self.cam.left.fullProjectionMatrix()
+        actual = self.cam.get_left_camera().full_projection_matrix()
         assert_almost_equal(expected,actual,6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().fullProjectionMatrix()
+            assert_almost_equal(expected,actual,6)
 
     def test_cx(self):
         expected = 285.557607
-        actual = self.cam.left.cx()
+        actual = self.cam.get_left_camera().cx()
         assert_almost_equal(expected,actual,6)
 
     def test_cy(self):
         expected = 223.2961788
-        actual = self.cam.left.cy()
+        actual = self.cam.get_left_camera().cy()
         assert_almost_equal(expected,actual,6)
 
     def test_fx(self):
         expected = 295.534020597
-        actual = self.cam.left.fx()
-        assert_almost_equal(expected,actual,6)
+        actual = self.cam.get_left_camera().fx()
+        assert_almost_equal(expected,actual,6)   
 
     def test_fy(self):
         expected = 295.534020597
-        actual = self.cam.left.fy()
-        assert_almost_equal(expected,actual,6)
+        actual = self.cam.get_left_camera().fy()
+        assert_almost_equal(expected,actual,6)   
 
     def test_tx(self):
         expected = 0.0
-        actual = self.cam.left.Tx()
-        assert_almost_equal(expected,actual,6)
+        actual = self.cam.get_left_camera().tx()
+        assert_almost_equal(expected,actual,6)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().Tx()
+            assert_almost_equal(expected,actual,6)   
 
     def test_ty(self):
         expected = 0.0
-        actual = self.cam.left.Ty()
-        assert_almost_equal(expected,actual,6)
+        actual = self.cam.get_left_camera().ty()
+        assert_almost_equal(expected,actual,6)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().Ty()
+            assert_almost_equal(expected,actual,6)   
 
     def test_fov_x(self):
         expected = 1.6502496354
-        actual = self.cam.left.fovX()
-        assert_almost_equal(expected,actual,6)
+        actual = self.cam.get_left_camera().fov_x()
+        assert_almost_equal(expected,actual,6)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().fovX()
+            assert_almost_equal(expected,actual,6)   
 
     def test_fov_y(self):
         expected = 1.364138172
-        actual = self.cam.left.fovY()
-        assert_almost_equal(expected,actual,6)
+        actual = self.cam.get_left_camera().fov_y()
+        assert_almost_equal(expected,actual,6)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().fovY()
+            assert_almost_equal(expected,actual,6)   
 
-    def test_tf_frame(self):
+    def test_get_tf_frame(self):
         expected = "left_camera"
-        actual = self.cam.left.tfFrame()
+        actual = self.cam.get_left_camera().get_tf_frame()
+        self.assertEqual(expected,actual)   
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.get_left_camera().tfFrame()
+            self.assertEqual(expected,actual)
+        actual = self.cam.get_tf_frame()
         self.assertEqual(expected,actual)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.tfFrame()
+            self.assertEqual(expected,actual)
+
 
     def test_stereo_project_3d_to_pixel(self):
         point = (1.0,2.0,3.0)
-        expected = (self.cam.left.project3dToPixel(point), self.cam.right.project3dToPixel(point))
-        actual = self.cam.project3dToPixel(point)
+        expected = (self.cam.get_left_camera().project_3d_to_pixel(point), self.cam.get_right_camera().project_3d_to_pixel(point))
+        actual = self.cam.project_3d_to_pixel(point)
         assert_almost_equal(expected, actual, 6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.project3dToPixel(point)
+            assert_almost_equal(expected, actual, 6)
 
     def test_stereo_project_pixel_to_3d(self):
         left_uv = (1.0,2.0)
         disparity = 1.1234
         expected = [-22.71975 , -17.668808,  23.596132]
-        actual = self.cam.projectPixelTo3d(left_uv, disparity)
+        actual = self.cam.project_pixel_to_3d(left_uv, disparity)
         assert_almost_equal(expected, actual, 6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.projectPixelTo3d(left_uv, disparity)
+            assert_almost_equal(expected, actual, 6)
 
-    def test_stereo_project_get_z(self):
+    def test_stereo_get_z(self):
         disparity = 1.1234
         expected = 23.59613246
-        actual = self.cam.getZ(disparity)
+        actual = self.cam.get_z(disparity)
         assert_almost_equal(expected, actual, 6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.getZ(disparity)
+            assert_almost_equal(expected, actual, 6)
 
-    def test_stereo_project_get_disparity(self):
+    def test_stereo_get_disparity(self):
         z = 23.59613246
         expected = 1.1234
-        actual = self.cam.getDisparity(z)
+        actual = self.cam.get_disparity(z)
         assert_almost_equal(expected, actual, 6)
+        with self.assertWarns(DeprecationWarning):
+            actual = self.cam.getDisparity(z)
+            assert_almost_equal(expected, actual, 6)
+
+    def test_deprecation(self):
+        pinholeCam = self.cam.get_left_camera()
+        with self.assertWarns(DeprecationWarning):
+            self.cam.get_left_camera().fromCameraInfo(self.lmsg)
+        with self.assertWarns(DeprecationWarning):
+            self.cam.fromCameraInfo(self.lmsg, self.rmsg)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.K, pinholeCam._k)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.D, pinholeCam._d)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.R, pinholeCam._r)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.P, pinholeCam._p)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.full_K, pinholeCam._full_k)
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(pinholeCam.full_P, pinholeCam._full_p)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.width, pinholeCam._width)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.height, pinholeCam._height)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.binning_x, pinholeCam._binning_x)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.binning_y, pinholeCam._binning_y)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.raw_roi, pinholeCam._raw_roi)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.tf_frame, pinholeCam._tf_frame)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(pinholeCam.stamp, pinholeCam._stamp)
+        with self.assertWarns(DeprecationWarning):
+            self.assertIs(self.cam.left, self.cam.get_left_camera())
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(self.cam.right, self.cam.get_right_camera())
+        with self.assertWarns(DeprecationWarning):
+            assert_almost_equal(self.cam.Q, self.cam._q)
+        
+
+
+
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(TestDirected('test_stereo'))
-    # suite.addTest(TestDirected('test_monocular'))
+    suite.addTest(TestDirected('test_rectify_image'))
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))
@@ -251,7 +389,6 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_projection_matrix'))
     suite.addTest(TestDirected('test_full_intrinsic_matrix'))
     suite.addTest(TestDirected('test_full_projection_matrix'))
-    suite.addTest(TestDirected('test_full_projection_matrix'))
     suite.addTest(TestDirected('test_cx'))
     suite.addTest(TestDirected('test_cy'))
     suite.addTest(TestDirected('test_fx'))
@@ -260,9 +397,10 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_ty'))
     suite.addTest(TestDirected('test_fov_x'))
     suite.addTest(TestDirected('test_fov_y'))
-    suite.addTest(TestDirected('test_tf_frame'))
+    suite.addTest(TestDirected('test_get_tf_frame'))
     suite.addTest(TestDirected('test_stereo_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_stereo_project_pixel_to_3d'))
-    suite.addTest(TestDirected('test_stereo_project_get_z'))
-    suite.addTest(TestDirected('test_stereo_project_get_disparity'))
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite.addTest(TestDirected('test_stereo_get_z'))
+    suite.addTest(TestDirected('test_stereo_get_disparity'))
+    suite.addTest(TestDirected('test_deprecation'))
+    unittest.TextTestRunner(verbosity=3).run(suite)
