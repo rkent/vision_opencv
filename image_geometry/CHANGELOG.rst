@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.1.0 (2024-04-19)
+------------------
 * Handle upstream deprecation of numpy.matrix, by deprecating methods that return numpy.matrix (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
 * Introduce new methods which return numpy.ndarray, that follow python coding style (snake_case) (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
 * Add tests for deprecated members, fix a few discovered bugs (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
