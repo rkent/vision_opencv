@@ -2,6 +2,16 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Handle upstream deprecation of numpy.matrix, by deprecating methods that return numpy.matrix (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
+* Introduce new methods which return numpy.ndarray, that follow python coding style (snake_case) (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
+* Add tests for deprecated members, fix a few discovered bugs (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
+* Enable tests that were disabled during ros 2 port (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
+* Add python3-deprecated dependency (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
+* Add rectify_image test (`#527 <https://github.com/ros-perception/vision_opencv/issues/527>`_)
+* Contributors: Kenji Brameld, Scott Monaghan
+
 4.0.0 (2024-04-13)
 ------------------
 * Add unit tests for all public members (`#526 <https://github.com/ros-perception/vision_opencv/pull/526>`_)

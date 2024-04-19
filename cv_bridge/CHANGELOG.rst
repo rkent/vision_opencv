@@ -2,6 +2,9 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 4.0.0 (2024-04-13)
 ------------------
 * Decode images in mode IMREAD_UNCHANGED (`#520 <https://github.com/ros-perception/vision_opencv/issues/520>`_)
