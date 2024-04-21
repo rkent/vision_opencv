@@ -6,7 +6,7 @@ import numpy as np
 import warnings
 from deprecated.sphinx import deprecated
 
-def mkmat(rows, cols, L) -> numpy.ndarray:
+def _mkmat(rows, cols, L) -> numpy.ndarray:
     mat = np.array(L,dtype='float64')
     mat.resize(rows,cols)
     return mat
@@ -40,15 +40,15 @@ class PinholeCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        self._k = mkmat(3, 3, msg.k)
+        self._k = _mkmat(3, 3, msg.k)
         if msg.d:
-            self._d = mkmat(len(msg.d), 1, msg.d)
+            self._d = _mkmat(len(msg.d), 1, msg.d)
         else:
             self._d = None
-        self._r = mkmat(3, 3, msg.r)
-        self._p = mkmat(3, 4, msg.p)
-        self._full_k = mkmat(3, 3, msg.k)
-        self._full_p = mkmat(3, 4, msg.p)
+        self._r = _mkmat(3, 3, msg.r)
+        self._p = _mkmat(3, 4, msg.p)
+        self._full_k = _mkmat(3, 3, msg.k)
+        self._full_p = _mkmat(3, 4, msg.p)
         self._width = msg.width
         self._height = msg.height
         self._binning_x = max(1, msg.binning_x)
@@ -103,7 +103,7 @@ class PinholeCameraModel:
         pixel coordinates of the rectified point.
         """
 
-        src = mkmat(1, 2, list(uv_raw))
+        src = _mkmat(1, 2, list(uv_raw))
         src.resize((1,1,2))
         dst = cv2.undistortPoints(src, self._k, self._d, R=self._r, P=self._p)
         return dst[0,0]
@@ -118,7 +118,7 @@ class PinholeCameraModel:
         using the camera :math:`P` matrix.
         This is the inverse of :math:`projectPixelTo3dRay`.
         """
-        src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
+        src = _mkmat(4, 1, [point[0], point[1], point[2], 1.0])
         dst = self._p @ src
         x = dst[0,0]
         y = dst[1,0]
@@ -777,7 +777,7 @@ class StereoCameraModel:
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
-        src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
+        src = _mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
         dst = self._q @ src
         x = dst[0, 0]
         y = dst[1, 0]
