@@ -339,66 +339,118 @@ class PinholeCameraModel:
     @property
     @deprecated(version="J-turtle", reason="The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def binning_x(self):
+        """ 
+        .. warning::
+            The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._binning_x
 
     @property
     @deprecated(version="J-turtle", reason="The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def binning_y(self):
+        """ 
+        .. warning::
+            The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._binning_y
 
     @property
     @deprecated(version="J-turtle", reason="The D->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
     def D(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The D property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._d, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The full_K->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.")
     def full_K(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The full_K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._full_k, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The full_P->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.")
     def full_P(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The full_P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._full_p, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The height property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def height(self):
+        """ 
+        .. warning::
+            The height property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._height
 
     @property
     @deprecated(version="J-turtle", reason="The K->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.")
     def K(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._k, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The P->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.")
     def P(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._p, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The R->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.")
     def R(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The R property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._r)
 
     @property
     @deprecated(version="J-turtle", reason="The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def raw_roi(self):
+        """ 
+        .. warning::
+            The raw_roi property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._raw_roi
 
     @property
     @deprecated(version="J-turtle", reason="The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def stamp(self):
+        """ 
+        .. warning::
+            The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._stamp
 
     @property
     @deprecated(version="J-turtle", reason="The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_tf_frame() method.")
     def tf_frame(self):
+        """ 
+        .. warning::
+            The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._tf_frame
 
     @property
     @deprecated(version="J-turtle", reason="The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def width(self):
+        """ 
+        .. warning::
+            The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._width
     
     @deprecated(version="J-turtle", reason="The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
@@ -839,16 +891,28 @@ class StereoCameraModel:
     @property
     @deprecated(version="J-turtle", reason="The left property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_left_camera() method.")
     def left(self):
+        """ 
+        .. warning::
+            The left property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._left
 
     @property
     @deprecated(version="J-turtle", reason="The right property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_right_camera() method.")
     def right(self):
+        """ 
+        .. warning::
+            The right property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._right
 
     @property
     @deprecated(version="J-turtle", reason="The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def Q(self):
+        """ 
+        .. warning::
+            The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._q
 
     @deprecated(version="J-turtle", reason="The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.")
