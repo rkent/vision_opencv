@@ -6,7 +6,7 @@ import numpy as np
 import warnings
 from deprecated.sphinx import deprecated
 
-def mkmat(rows, cols, L) -> numpy.ndarray:
+def _mkmat(rows, cols, L) -> numpy.ndarray:
     mat = np.array(L,dtype='float64')
     mat.resize(rows,cols)
     return mat
@@ -40,15 +40,15 @@ class PinholeCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        self._k = mkmat(3, 3, msg.k)
+        self._k = _mkmat(3, 3, msg.k)
         if msg.d:
-            self._d = mkmat(len(msg.d), 1, msg.d)
+            self._d = _mkmat(len(msg.d), 1, msg.d)
         else:
             self._d = None
-        self._r = mkmat(3, 3, msg.r)
-        self._p = mkmat(3, 4, msg.p)
-        self._full_k = mkmat(3, 3, msg.k)
-        self._full_p = mkmat(3, 4, msg.p)
+        self._r = _mkmat(3, 3, msg.r)
+        self._p = _mkmat(3, 4, msg.p)
+        self._full_k = _mkmat(3, 3, msg.k)
+        self._full_p = _mkmat(3, 4, msg.p)
         self._width = msg.width
         self._height = msg.height
         self._binning_x = max(1, msg.binning_x)
@@ -103,7 +103,7 @@ class PinholeCameraModel:
         pixel coordinates of the rectified point.
         """
 
-        src = mkmat(1, 2, list(uv_raw))
+        src = _mkmat(1, 2, list(uv_raw))
         src.resize((1,1,2))
         dst = cv2.undistortPoints(src, self._k, self._d, R=self._r, P=self._p)
         return dst[0,0]
@@ -116,9 +116,9 @@ class PinholeCameraModel:
 
         Returns the rectified pixel coordinates (u, v) of the 3D point,
         using the camera :math:`P` matrix.
-        This is the inverse of :math:`projectPixelTo3dRay`.
+        This is the inverse of project_pixel_to_3d_ray().
         """
-        src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
+        src = _mkmat(4, 1, [point[0], point[1], point[2], 1.0])
         dst = self._p @ src
         x = dst[0,0]
         y = dst[1,0]
@@ -136,7 +136,7 @@ class PinholeCameraModel:
 
         Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
         using the camera :math:`P` matrix.
-        This is the inverse of :math:`project_3d_to_pixel`.
+        This is the inverse of project_3d_to_pixel().
         """
         x = (uv[0] - self.cx()) / self.fx()
         y = (uv[1] - self.cy()) / self.fy()
@@ -155,7 +155,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta u, given Z and delta X in Cartesian space.
-        For given Z, this is the inverse of :math:`get_delta_x`.
+        For given Z, this is the inverse of get_delta_x().
         """
         if z == 0:
             return float('inf')
@@ -171,7 +171,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta v, given Z and delta Y in Cartesian space.
-        For given Z, this is the inverse of :math:`get_delta_y`.
+        For given Z, this is the inverse of get_delta_y().
         """
         if z == 0:
             return float('inf')
@@ -187,7 +187,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta X, given Z in cartesian space and delta u in pixels.
-        For given Z, this is the inverse of :math:`get_delta_u`.
+        For given Z, this is the inverse of get_delta_u().
         """
         return z * delta_u / self.fx()
 
@@ -200,7 +200,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta Y, given Z in cartesian space and delta v in pixels.
-        For given Z, this is the inverse of :math:`get_delta_v`.
+        For given Z, this is the inverse of get_delta_v().
         """
         return z * delta_v / self.fy()
 
@@ -339,66 +339,118 @@ class PinholeCameraModel:
     @property
     @deprecated(version="J-turtle", reason="The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def binning_x(self):
+        """ 
+        .. warning::
+            The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._binning_x
 
     @property
     @deprecated(version="J-turtle", reason="The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def binning_y(self):
+        """ 
+        .. warning::
+            The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._binning_y
 
     @property
     @deprecated(version="J-turtle", reason="The D->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
     def D(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The D property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._d, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The full_K->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.")
     def full_K(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The full_K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._full_k, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The full_P->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.")
     def full_P(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The full_P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._full_p, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The height property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def height(self):
+        """ 
+        .. warning::
+            The height property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._height
 
     @property
     @deprecated(version="J-turtle", reason="The K->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.")
     def K(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._k, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The P->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.")
     def P(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._p, dtype="float64")
 
     @property
     @deprecated(version="J-turtle", reason="The R->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.")
     def R(self)->numpy.matrix:
+        """ 
+        .. warning::
+            The R property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return numpy.matrix(self._r)
 
     @property
     @deprecated(version="J-turtle", reason="The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def raw_roi(self):
+        """ 
+        .. warning::
+            The raw_roi property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._raw_roi
 
     @property
     @deprecated(version="J-turtle", reason="The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def stamp(self):
+        """ 
+        .. warning::
+            The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._stamp
 
     @property
     @deprecated(version="J-turtle", reason="The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_tf_frame() method.")
     def tf_frame(self):
+        """ 
+        .. warning::
+            The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._tf_frame
 
     @property
     @deprecated(version="J-turtle", reason="The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def width(self):
+        """ 
+        .. warning::
+            The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._width
     
     @deprecated(version="J-turtle", reason="The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
@@ -757,7 +809,7 @@ class StereoCameraModel:
         
         Returns the rectified pixel coordinates (u, v) of the 3D point, for each camera, as ((u_left, v_left), (u_right, v_right))
         using the cameras' :math:`P` matrices.
-        This is the inverse of :math:`projectPixelTo3d`.
+        This is the inverse of project_pixel_to_3d().
         """
         l = self._left.project_3d_to_pixel(point)
         r = self._right.project_3d_to_pixel(point)
@@ -773,11 +825,11 @@ class StereoCameraModel:
 
         Returns the 3D point (x, y, z) for the given pixel position,
         using the cameras' :math:`P` matrices.
-        This is the inverse of :math:`project_3d_to_pixel`.
+        This is the inverse of project_3d_to_pixel().
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
-        src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
+        src = _mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
         dst = self._q @ src
         x = dst[0, 0]
         y = dst[1, 0]
@@ -795,7 +847,7 @@ class StereoCameraModel:
         :rtype:                  float
 
         Returns the depth at which a point is observed with a given disparity.
-        This is the inverse of :math:`getDisparity`.
+        This is the inverse of get_disparity().
 
         Note that a disparity of zero implies Z is infinite.
         """
@@ -811,7 +863,7 @@ class StereoCameraModel:
         :rtype:            float
 
         Returns the disparity observed for a point at depth Z.
-        This is the inverse of :math:`getZ`.
+        This is the inverse of get_z().
         """
         if z == 0:
             return float('inf')
@@ -839,16 +891,28 @@ class StereoCameraModel:
     @property
     @deprecated(version="J-turtle", reason="The left property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_left_camera() method.")
     def left(self):
+        """ 
+        .. warning::
+            The left property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._left
 
     @property
     @deprecated(version="J-turtle", reason="The right property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_right_camera() method.")
     def right(self):
+        """ 
+        .. warning::
+            The right property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._right
 
     @property
     @deprecated(version="J-turtle", reason="The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
     def Q(self):
+        """ 
+        .. warning::
+            The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+        """
         return self._q
 
     @deprecated(version="J-turtle", reason="The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.")
